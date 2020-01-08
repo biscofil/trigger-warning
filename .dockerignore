@@ -1,0 +1,13 @@
+.env
+.env.example
+.styleci.yml
+*.tgz
+mysql
+html
+*.yaml
+.gitlab-ci.yml
+Dockerfile
+README.md
+.editorconfig
+.gitattributes
+# TODO vendor

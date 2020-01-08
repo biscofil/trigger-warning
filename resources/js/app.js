@@ -1,0 +1,76 @@
+/**
+ * First we will load all of this project's JavaScript dependencies which
+ * includes Vue and other libraries. It is a great starting point when
+ * building robust, powerful web applications using Vue and Laravel.
+ */
+
+require('./bootstrap');
+
+window.Vue = require('vue');
+
+import axios from 'axios';
+import Vue from 'vue'
+
+axios.defaults.headers.common = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+};
+
+window.toastr = require('vue-toastr');
+Vue.use(window.toastr);
+
+/**
+ * The following block of code may be used to automatically register your
+ * Vue components. It will recursively scan this directory for the Vue
+ * components and automatically register them with their "basename".
+ *
+ * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
+ */
+
+// const files = require.context('./', true, /\.vue$/i)
+// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
+
+Vue.component('home', require('./components/Home.vue').default);
+Vue.component('trigger-warning', require('./components/TriggerWarning/Play.vue').default);
+Vue.component('one-word-each', require('./components/OneWordEach/Play.vue').default);
+
+/**
+ * Next, we will create a fresh Vue application instance and attach it to
+ * the page. Then, you may begin adding components to this application
+ * or customize the JavaScript scaffolding to fit your unique needs.
+ */
+
+const app = new Vue({
+    el: '#app',
+
+    mounted() {
+
+        let self = this;
+        self.sendHeartBeat();
+
+        this.$nextTick(function () {
+
+            window.setInterval(() => {
+
+                self.sendHeartBeat();
+
+            }, 10000);
+
+        })
+    },
+
+    methods: {
+
+        sendHeartBeat() {
+            axios.get('/api/heartbeat')
+                .then(response => {
+
+                })
+                .catch(e => {
+
+                })
+        }
+
+    }
+});

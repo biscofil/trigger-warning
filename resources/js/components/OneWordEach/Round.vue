@@ -1,0 +1,138 @@
+<template>
+
+    <div class="row" v-if="round">
+
+        <div class="col-sm-4" align="center">
+
+            <b>Suggeritore 1</b>
+
+            <PlayerProfile
+                :player="round.first_suggesting_user"/>
+
+        </div>
+
+        <div class="col-sm-4" align="center">
+
+            <PlayerProfile
+                :player="round.guessing_user"/>
+
+        </div>
+
+        <div class="col-sm-4" align="center">
+
+            <b>Suggeritore 2</b>
+
+            <PlayerProfile
+                :player="round.second_suggesting_user"/>
+
+        </div>
+
+        <div class="col-sm-12" align="center">
+
+            <Countdown :deadline="round.end_time"></Countdown>
+
+        </div>
+
+        <div class="col-sm-12" align="center" v-if="me.id !== round.guessing_user.id">
+
+            <h1>{{round.word.word}}</h1>
+
+            <p>Parole vietate: {{round.word.forbidden_words}}</p>
+
+            <button class="btn btn-success" @click="closeRound(true)">
+                Ce l'han fatta
+            </button>
+
+            <button class="btn btn-danger" @click="closeRound(false)">
+                Mannaggia
+            </button>
+
+        </div>
+
+    </div>
+
+</template>
+
+<script>
+
+    var moment = require('moment');
+
+    import PlayerProfile from "../PlayerProfile";
+    import Countdown from "./Countdown";
+
+    export default {
+
+        name: "Round",
+
+        components: {
+            PlayerProfile,
+            Countdown
+        },
+
+        props: {
+            round_id: {
+                required: true
+            }
+        },
+
+        data() {
+            return {
+                me: null,
+                round: null
+            }
+        },
+
+
+        mounted() {
+
+            let self = this;
+            self.fetch();
+
+        },
+
+        methods: {
+
+            fetch() {
+
+                let self = this;
+
+                axios.get('/api/games/one_word_each/rounds/' + this.round_id)
+                    .then(response => {
+
+                        self.me = response.data.me;
+                        self.round = response.data.round;
+
+                        self.round.end_time = moment(self.round.end_time);
+
+                    })
+                    .catch(e => {
+
+                        self.$toastr.e("Ops...");
+
+                    });
+            },
+
+            closeRound(success) {
+                let self = this;
+
+                axios.post('/api/games/one_word_each/rounds/' + this.round_id + '/close', {
+                    success: success ? 1 : 0
+                })
+                    .then(response => {
+                        self.$toastr.s("Ok");
+                        self.$emit('end');
+                    })
+                    .catch(e => {
+                        self.$toastr.e("Ops...");
+                    });
+
+            }
+
+        }
+
+    }
+</script>
+
+<style scoped>
+
+</style>
