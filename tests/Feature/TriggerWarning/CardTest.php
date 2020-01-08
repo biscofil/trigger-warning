@@ -60,7 +60,7 @@ class CardTest extends TestCase
     }
 
     /**
-     * @test
+     * @ TODO test
      */
     public function replacePlaceholdersTest()
     {

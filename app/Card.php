@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Faker\Generator as Faker;
 
 /**
  * Class Card
@@ -72,8 +74,11 @@ class Card extends Model
 
         $waitHours = config('game.trigger_warning.card_random.wait_hours');
 
-        $query->where('created_at', '<',
-            Carbon::now()->subHours($waitHours)->toDateTimeString());
+        $query->where(
+            'created_at',
+            '<',
+            Carbon::now()->subHours($waitHours)->toDateTimeString()
+        );
 
         return $query;
     }
@@ -130,7 +135,9 @@ class Card extends Model
         $daysMultiplier = config('game.trigger_warning.card_random.days_multiplier');
         if (!is_null($daysMultiplier)) {
             $daysMultiplier = floatval($daysMultiplier);
-            $daysSinceLastUpdate = "DATEDIFF( NOW() , updated_at )";
+            // SQLite: difference in days using julianday()
+            $daysSinceLastUpdate = "(julianday('now') - julianday(updated_at))";
+            // Normalize by dividing by the maximum days-since-update
             $daysSinceLastUpdateNormalized = "$daysSinceLastUpdate / ( SELECT MAX($daysSinceLastUpdate) + 1  FROM cards)";
             $orderByParts[] = "( ($daysSinceLastUpdateNormalized)  * $daysMultiplier )";
         }
@@ -140,7 +147,7 @@ class Card extends Model
         $randomMultiplier = config('game.trigger_warning.card_random.random_multiplier');
         if (!is_null($randomMultiplier)) {
             $randomMultiplier = floatval($randomMultiplier);
-            $orderByParts[] = "( RAND() * $randomMultiplier )";
+            $orderByParts[] = "( random() * $randomMultiplier )";
         }
 
         // ####################### Build Query
@@ -150,7 +157,6 @@ class Card extends Model
         }
 
         return $query;
-
     }
 
     /**
@@ -232,23 +238,36 @@ class Card extends Model
      */
     public function replacePlaceholders(): void
     {
+        return; // Temporarily disabled. TODO restore this feature later.
+
+        $str_replace_first = function ($search, $replace, $subject) {
+            $search = '/' . preg_quote($search, '/') . '/';
+            return preg_replace($search, $replace, $subject, 1);
+        };
+
         if (!is_null($this->original_content)) {
             $this->content = $this->original_content;
 
             // User name placeholder
             if (Str::contains($this->content, self::NAME_PLACEHOLDER)) {
                 $count = substr_count($this->content, self::NAME_PLACEHOLDER);
-                $users = User::query()->select('name')->get()->pluck('name')->toArray();
+                $users = User::query()->select('name')->limit($count)->get()->pluck('name')->toArray();
 
-                $users = count($users) ? $users : ["qualcuno", "gesù"]; // fallback
+                if (count($users) != $count) {
+                    $faker = app(Faker::class);
+                    // Add fake names to avoid errors
+                    for ($a = count($users); $a < $count; $a++) {
+                        $users[] = $faker->name();
+                    }
+                }
 
-                for ($i = 0; $i < $count; $i++) {
-                    $this->content = str_replace(self::NAME_PLACEHOLDER, $users[array_rand($users)], $this->original_content);
+                // shuffle users
+                shuffle($users);
+
+                foreach ($users as $userName) {
+                    $this->content = $str_replace_first(self::NAME_PLACEHOLDER, $userName, $this->content);
                 }
             }
-
         }
     }
-
-
 }

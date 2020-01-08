@@ -1,13 +1,22 @@
+.git
 .env
-.env.example
 .styleci.yml
 *.tgz
 mysql
 html
 *.yaml
+phpunit_gitlab.xml
+phpunit.xml
 .gitlab-ci.yml
 Dockerfile
+docker-compose.yml
 README.md
 .editorconfig
 .gitattributes
-# TODO vendor
+vendor
+storage-volume
+bootstrap/cache
+!bootstrap/cache/.gitignore
+helm
+storage
+!storage/**/.gitignore
