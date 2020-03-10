@@ -2,12 +2,27 @@
 
 namespace App;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * Class User
+ * @property mixed id
+ * @property mixed name
+ * @property mixed email
+ * @property bool approved
+ *
+ * @property mixed provider
+ * @property mixed provider_id
+ *
+ * @property mixed avatar
+ * @property mixed avatar_original
+ *
+ * @package App
+ */
 class User extends Authenticatable
 {
+
     use Notifiable;
 
     /**
@@ -16,7 +31,13 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'approved',
+        'provider', 'provider_id',
+        'avatar', 'avatar_original'
+    ];
+
+    protected $casts = [
+        'approved' => 'bool'
     ];
 
     /**
@@ -25,15 +46,14 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'provider', 'provider_id',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function cardsInHand(){
+
+        return $this->hasMany(Card::class );
+
+    }
+
+
 }

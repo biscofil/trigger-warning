@@ -11,4 +11,11 @@
 |
 */
 
-Route::get('/', 'HomeController@index');
+Route::get('/', 'HomeController@index')->name('homepage');
+
+Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
+
+Route::get('/redirect', 'Auth\LoginController@redirectToProvider')->name('login');
+Route::get('/callback', 'Auth\LoginController@handleProviderCallback');
+
+Route::get('/home', 'HomeController@play')->name('play');
