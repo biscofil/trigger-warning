@@ -10,6 +10,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\InvalidStateException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class LoginController extends Controller
@@ -64,7 +65,11 @@ class LoginController extends Controller
 
         try {
 
-            $user = Socialite::driver('google')->user();
+            try {
+                $user = Socialite::driver('google')->user();
+            }catch(InvalidStateException $e){
+                $user = Socialite::driver('google')->stateless()->user();
+            }
 
             // check if they're an existing user
             $existingUser = User::where('provider', 'google')
