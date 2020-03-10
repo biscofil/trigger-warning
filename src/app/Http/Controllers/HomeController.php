@@ -18,13 +18,5 @@ class HomeController extends Controller
         return view('index');
     }
 
-    /**
-     * @return string
-     */
-    public function play()
-    {
-        return view('play');
-    }
-
 }
 

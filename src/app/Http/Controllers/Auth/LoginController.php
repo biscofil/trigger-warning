@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\MyEvent;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\User;
@@ -69,6 +70,8 @@ class LoginController extends Controller
             $existingUser = User::where('provider', 'google')
                 ->where('provider_id', $user->id)
                 ->first();
+
+            event(new MyEvent('hello world'));
 
             if ($existingUser) {
 

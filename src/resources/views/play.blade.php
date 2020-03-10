@@ -1,7 +1,17 @@
 @extends('partials.layout')
 
+@section('scripts')
+
+    <script src="{{asset('js/app.js')}}"></script>
+
+@endsection
+
 @section('content')
-    <div class="title m-b-md">
-        Play
+
+    <div id="app">
+
+        <play-component></play-component>
+
     </div>
+
 @endsection

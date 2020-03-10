@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -11,6 +13,7 @@ use Illuminate\Notifications\Notifiable;
  * @property mixed name
  * @property mixed email
  * @property bool approved
+ * @property int score
  *
  * @property mixed provider
  * @property mixed provider_id
@@ -19,6 +22,7 @@ use Illuminate\Notifications\Notifiable;
  * @property mixed avatar_original
  *
  * @package App
+ * @method static Builder approved()
  */
 class User extends Authenticatable
 {
@@ -32,6 +36,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'email', 'approved',
+        'score',
         'provider', 'provider_id',
         'avatar', 'avatar_original'
     ];
@@ -46,14 +51,24 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'provider', 'provider_id',
+        'provider', 'provider_id', 'email', 'approved'
     ];
 
-    public function cardsInHand(){
-
-        return $this->hasMany(Card::class );
-
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeApproved(Builder $query): Builder
+    {
+        return $query->where('approved', '=', true);
     }
 
+    /**
+     * @return HasMany
+     */
+    public function cardsInHand(): HasMany
+    {
+        return $this->hasMany(Card::class);
+    }
 
 }

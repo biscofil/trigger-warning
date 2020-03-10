@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -13,8 +11,14 @@ use Illuminate\Http\Request;
 |
 */
 
-/*
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth')->group(function () {
+
+    Route::get('/game', 'GameController@xhr_play');
+
+    Route::get('/rounds/{round}', 'RoundController@show');
+    Route::post('/rounds', 'RoundController@store');
+
+
+    //Route::get('deck', 'Auth\AuthController@me');
+
 });
-*/
