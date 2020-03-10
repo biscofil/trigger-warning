@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Events\MyEvent;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use App\User;
 use Exception;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -75,6 +75,7 @@ class LoginController extends Controller
 
             if ($existingUser) {
 
+
                 /** @var User $existingUser */
 
                 if ($existingUser->approved) {
@@ -92,6 +93,9 @@ class LoginController extends Controller
 
 
             } else {
+
+                LOG::log("New user " . $user->email);
+
                 // create a new user
                 $newUser = new User;
                 $newUser->name = $user->name;
@@ -108,6 +112,8 @@ class LoginController extends Controller
             }
 
         } catch (Exception $e) {
+
+            LOG::error($e);
 
             return redirect()->route('homepage')->withErrors("CAZZO! qualcosa non va");
 
