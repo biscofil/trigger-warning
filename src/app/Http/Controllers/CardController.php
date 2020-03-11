@@ -89,7 +89,7 @@ class CardController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return array|Response
+     * @return array|JsonResponse|Response
      */
     public function store(Request $request)
     {
@@ -104,10 +104,14 @@ class CardController extends Controller
 
         $type = intval($validatedData['type']);
 
-        $count = substr_count($validatedData['content'], '@');
+        if ($type == Card::$TypeCartToFill) {
 
-        if ($count === 0 || $count > 2) {
-            return response()->json(['error' => 'Puoi mettere uno o due spazi da riempire!'], 400);
+            $count = substr_count($validatedData['content'], '@');
+
+            if ($count === 0 || $count > 2) {
+                return response()->json(['error' => 'Puoi mettere uno o due spazi da riempire!'], 400);
+            }
+
         }
 
         Card::create([
