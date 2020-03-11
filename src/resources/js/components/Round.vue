@@ -25,24 +25,22 @@
 
                 </div>
 
-                <div class="col-sm-6" align="center">
+                <div class="col-sm-6" align="center" v-if="me.id !== round.host_user_id">
 
                     <h3>Le tue carte scelte:</h3>
 
-                    <div class="row">
+                    <draggable class="row draggable-holder"
+                               v-model="picked_cards"
+                               v-bind="dragOptions"
+                               @end="onDrop"
+                               id="picked_card_list">
 
-                        <draggable class="col-sm-12 draggable-holder"
-                                   v-model="picked_cards"
-                                   v-bind="dragOptions"
-                                   id="picked_card_list">
+                        <div class="col" v-for="picked_card in picked_cards" :key="picked_card.id"
+                             :card_id="picked_card.id">
+                            <Card :card="picked_card"></Card>
+                        </div>
 
-                            <div v-for="picked_card in picked_cards" :key="picked_card.id">
-                                <Card :card="picked_card"></Card>
-                            </div>
-
-                        </draggable>
-
-                    </div>
+                    </draggable>
 
                 </div>
 
@@ -71,11 +69,11 @@
                             -->
 
                             <span v-if="player.id%2==0" class="badge badge-success">
-                                <h4>Carta pescata</h4>
+                                <h4>Carte pescate</h4>
                             </span>
 
                             <span v-else class="badge badge-warning">
-                                <h4>Carta non pescata</h4>
+                                <h4>Non ancora pronto!</h4>
                             </span>
 
                         </div>
@@ -98,17 +96,19 @@
 
         </div>
 
-        <div class="col-sm-12">
+        <!-- IF NOT HOST, SHOW DECK -->
+        <div class="col-sm-12" v-if="me.id !== round.host_user_id">
 
             <h3>Il tuo mazzo</h3>
 
             <draggable class="draggable-holder row"
                        v-model="my_cards"
                        v-bind="dragOptions"
+                       @end="onDrop"
                        :move="onMoveCallback"
                        id="deck">
 
-                <div class="col-sm-2" v-for="card in my_cards" :key="card.id">
+                <div class="col-sm-2" v-for="card in my_cards" :key="card.id" :card_id="card.id">
                     <Card :card="card"></Card>
                 </div>
 
@@ -148,10 +148,10 @@
 
             axios.get('api/rounds/' + this.round_id)
                 .then(response => {
-
-                    self.my_cards = response.data.my_cards;
+                    self.me = response.data.me;
                     self.round = response.data.round;
-
+                    self.my_cards = response.data.my_cards;
+                    self.picked_cards = response.data.picked_cards;
                 })
                 .catch(e => {
 
@@ -163,9 +163,10 @@
 
         data() {
             return {
+                me: null,
                 round: null,
                 my_cards: null,
-                picked_cards: []
+                picked_cards: null
             }
         },
         computed: {
@@ -179,6 +180,23 @@
         },
 
         methods: {
+
+            onDrop(evt) {
+
+                let self = this;
+
+                if (evt.to.id === 'picked_card_list') {
+
+                    axios.put('api/rounds/' + this.round.id + '/cards/' + evt.item.attributes.card_id.value)
+                        .then(response => {
+                            self.$toastr.s("OK");
+                        })
+                        .catch(e => {
+                            self.$toastr.e("Errore");
+                        });
+
+                }
+            },
 
             onMoveCallback: function (evt, originalEvent) {
                 if (evt.to.id === 'picked_card_list') {

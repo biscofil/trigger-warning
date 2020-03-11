@@ -29,7 +29,12 @@ class Card extends Model
     protected $fillable = [
         'id',
         'type',
-        'content'
+        'content',
+        'picked',
+        'user_id',
+        'usage_count',
+        'win_count',
+        'creator_user_id',
     ];
 
     protected $appends = [
@@ -37,7 +42,8 @@ class Card extends Model
     ];
 
     protected $casts = [
-        'approved' => 'bool'
+        'approved' => 'bool',
+        'picked' => 'bool'
     ];
 
     /**
@@ -83,6 +89,15 @@ class Card extends Model
         return $query->where('type', '=', self::$TypeFillingCart);
     }
 
+    /**
+     * @param Builder $query
+     * @param bool $picked
+     * @return Builder
+     */
+    public function scopePicked(Builder $query, bool $picked = true): Builder
+    {
+        return $query->where('picked', '=', $picked);
+    }
 
     /**
      * Return the user who created this card
@@ -106,7 +121,7 @@ class Card extends Model
      * Returns the number of spaces to be filled
      * @return int
      */
-    public function getSpacesCountAttribute() : int
+    public function getSpacesCountAttribute(): int
     {
         return substr_count($this->content, '@');
     }

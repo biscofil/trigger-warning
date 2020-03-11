@@ -72,8 +72,10 @@ class RoundController extends Controller
         $round->setAttribute('players', $round->players());
 
         return [
+            'me' => $me,
             'round' => $round,
-            'my_cards' => $me->cardsInHand
+            'my_cards' => $me->cardsInHand()->picked(false)->get(),
+            'picked_cards' => $me->cardsInHand()->picked(true)->get(),
         ];
 
     }

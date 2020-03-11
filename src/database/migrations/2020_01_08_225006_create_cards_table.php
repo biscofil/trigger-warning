@@ -25,6 +25,8 @@ class CreateCardsTable extends Migration
 
             $table->boolean('approved')->default(false);
 
+            $table->boolean('picked')->default(false);
+
             $table->string('content');
 
             $table->unsignedBigInteger('usage_count')->default(0);
