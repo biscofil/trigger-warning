@@ -54,6 +54,7 @@
 
                     </div>
 
+                    <button class="btn btn-danger" @click="close">Chiudi</button>
                     <button class="btn btn-success" @click="save">Salva</button>
 
                 </div>
