@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="col-sm-12" align="center">
-                    <p><b>Anterpima:</b></p>
+                    <p><b>Anteprima:</b></p>
                     <Card :card="newCard"></Card>
                 </div>
 
