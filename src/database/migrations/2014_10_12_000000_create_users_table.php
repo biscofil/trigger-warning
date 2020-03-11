@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email');
 
-            $table->unsignedInteger('score');
+            $table->unsignedInteger('score')->default(0);
 
             $table->string('avatar');
             $table->string('avatar_original');

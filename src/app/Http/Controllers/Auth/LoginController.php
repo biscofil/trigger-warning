@@ -8,6 +8,7 @@ use App\User;
 use Exception;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -114,6 +115,8 @@ class LoginController extends Controller
             }
 
         } catch (Exception $e) {
+
+            LOG::error($e->getMessage());
 
             return redirect()->route('homepage')->withErrors("CAZZO! qualcosa non va");
 

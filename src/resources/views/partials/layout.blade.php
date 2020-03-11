@@ -25,6 +25,14 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        @foreach ($errors->all() as $error)
+            <div class="alert alert-danger">
+                <b>{{ $error }}</b>
+            </div>
+        @endforeach
+    @endif
+
     <div class="content">
 
         @yield('content')

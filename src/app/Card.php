@@ -12,6 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property mixed id
  * @property mixed type
  * @property mixed content
+ * @property bool approved
+ * @property int usage_count
+ * @property int win_count
+ * @property int spaces_count
+ * @property null|int user_id
+ * @property null|int creator_user_id
  * @method static Builder toFill()
  */
 class Card extends Model

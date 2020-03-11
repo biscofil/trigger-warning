@@ -29,6 +29,8 @@ class CreateCardsTable extends Migration
 
             $table->unsignedBigInteger('usage_count')->default(0);
 
+            $table->unsignedBigInteger('win_count')->default(0);
+
             // user that has the card in hand
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users');
