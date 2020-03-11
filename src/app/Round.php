@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Log;
 class Round extends Model
 {
 
-    public static $UserPerRound = 2; //3;
+    public static $UserPerRound = 2; // TODO make 3;
 
     protected $fillable = [
         'host_user_id',
@@ -103,14 +103,45 @@ class Round extends Model
 
         $newRound = new Round();
 
-        $users = User::approved();
-        if ($users->count() < Round::$UserPerRound) {
+        if (User::approved()->count() < Round::$UserPerRound) {
             throw new Exception('Servono almeno ' . Round::$UserPerRound . ' stronzi');
         }
-        /** @var User $host */
-        $host = $users->first();
-        $newRound->host_user_id = $host->id;
 
+        $host = null;
+
+        $lastRound = Round::query()->orderBy('id', 'desc')->first();
+        if (is_null($lastRound)) {
+            // first round ever
+
+            /** @var User $host */
+            $host = User::approved()->first();
+
+        } else {
+
+            /** @var Round $lastRound */
+
+            $host = User::approved()
+                ->where('id', '>', $lastRound->host_user_id)
+                ->orderBy('id', 'asc')
+                ->first();
+
+            if (is_null($host)) {
+
+                //last registered user, start from the first ID
+
+                $host = User::approved()
+                    ->orderBy('id', 'asc')
+                    ->first();
+
+            }
+
+        }
+
+        if (is_null($host)) {
+            throw new Exception("Errore durante l'elezione del nuovo host");
+        }
+
+        $newRound->host_user_id = $host->id;
 
         $mainCard = Card::toFill()->inRandomOrder()->first();
         if (is_null($mainCard)) {
