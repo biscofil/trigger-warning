@@ -102,9 +102,17 @@ class CardController extends Controller
             'type' => ['required', 'numeric', Rule::in([Card::$TypeCartToFill, Card::$TypeFillingCart])],
         ]);
 
+        $type = intval($validatedData['type']);
+
+        $count = substr_count($validatedData['content'], '@');
+
+        if ($count === 0 || $count > 2) {
+            return response()->json(['error' => 'Puoi mettere uno o due spazi da riempire!'], 400);
+        }
+
         Card::create([
             'content' => $validatedData['content'],
-            'type' => $validatedData['type'],
+            'type' => $type,
             'creator_user_id' => $me->id
         ]);
 

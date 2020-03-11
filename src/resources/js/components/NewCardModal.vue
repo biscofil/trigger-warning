@@ -99,7 +99,8 @@
                         self.$toastr.s("OOOOH LA");
                     })
                     .catch(e => {
-                        self.$toastr.e("FUCK.. ppobblemi");
+                        let error = e.response ? e.response.data.error : e;
+                        self.$toastr.e(error, "FUCK.. ppobblemi");
                     })
             },
 
