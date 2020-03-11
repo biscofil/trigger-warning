@@ -213,6 +213,8 @@ class Round extends Model
 
         $cards = Card::filling()->inMainDeck();
 
+        // TODO give priority to older or not used
+
         // check if we have enough cards
         if ($cards->count() < $requiredCardCount) {
             throw new Exception('Non ci sono abbastanza carte, ne servono almeno '
@@ -227,7 +229,11 @@ class Round extends Model
 
             /** @var User $player */
 
-            for ($a = 0; $a < $player->cardsNeeded(); $a++) {
+            Log::debug("user " . $player->id . " needs " . $player->cardsNeeded() . " cards");
+
+            for ($a = 0; $a <= $player->cardsNeeded(); $a++) {
+
+                Log::debug("adding card to user " . $player->id);
 
                 /** @var Card $card */
                 $card = $cardsToAssign->pop();
