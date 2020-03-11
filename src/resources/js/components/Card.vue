@@ -20,7 +20,10 @@
 
         computed: {
             cardContent() {
-                return this.card.content.replace('@', '____');
+                if (this.card.type == 1) { // to fill
+                    return this.card.content.replace(new RegExp(/@/, 'g'), '____');
+                }
+                return this.card.content;
             },
 
             cardClasses() {
