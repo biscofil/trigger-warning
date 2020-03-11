@@ -5,11 +5,7 @@
         <img class="card-img-top" :src="player.avatar" :alt="player.name">
 
         <div class="card-header">
-            {{ player.name }}
-        </div>
-
-        <div class="card-body">
-            Punteggio: {{ player.score }}
+            {{ player.name }} - {{ player.score }}
         </div>
 
     </div>

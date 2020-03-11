@@ -6,7 +6,7 @@
 
             <div class="row">
 
-                <div class="col-sm-6" align="center">
+                <div class="col-sm-3" align="center">
 
                     <h3>Host</h3>
 
@@ -17,11 +17,32 @@
 
                 </div>
 
-                <div class="col-sm-6" align="center">
+                <div class="col-sm-3" align="center">
 
                     <h3>Carta pescata:</h3>
 
                     <Card :card="round.card_to_fill"></Card>
+
+                </div>
+
+                <div class="col-sm-6" align="center">
+
+                    <h3>Le tue carte scelte:</h3>
+
+                    <div class="row">
+
+                        <draggable class="col-sm-12 draggable-holder"
+                                   v-model="picked_cards"
+                                   v-bind="dragOptions"
+                                   id="picked_card_list">
+
+                            <div v-for="picked_card in picked_cards" :key="picked_card.id">
+                                <Card :card="picked_card"></Card>
+                            </div>
+
+                        </draggable>
+
+                    </div>
 
                 </div>
 
@@ -81,13 +102,17 @@
 
             <h3>Il tuo mazzo</h3>
 
-            <div class="row">
+            <draggable class="draggable-holder row"
+                       v-model="my_cards"
+                       v-bind="dragOptions"
+                       :move="onMoveCallback"
+                       id="deck">
 
                 <div class="col-sm-2" v-for="card in my_cards" :key="card.id">
                     <Card :card="card"></Card>
                 </div>
 
-            </div>
+            </draggable>
 
         </div>
 
@@ -99,12 +124,14 @@
 
     import PlayerProfile from "./PlayerProfile";
     import Card from "./Card";
+    import draggable from 'vuedraggable';
 
     export default {
 
         name: "Round",
 
         components: {
+            draggable,
             Card,
             PlayerProfile
         },
@@ -137,8 +164,29 @@
         data() {
             return {
                 round: null,
-                my_cards: null
+                my_cards: null,
+                picked_cards: []
             }
+        },
+        computed: {
+            dragOptions() {
+                return {
+                    animation: 0,
+                    group: "user_cards",
+                    disabled: false,
+                };
+            }
+        },
+
+        methods: {
+
+            onMoveCallback: function (evt, originalEvent) {
+                if (evt.to.id === 'picked_card_list') {
+                    return this.picked_cards.length < this.round.card_to_fill.spaces_count;
+                }
+                return true;
+            }
+
         }
 
     }
@@ -149,6 +197,12 @@
 
     hr {
         border-top: 2px solid rgba(255, 255, 255, 0.28);
+    }
+
+    .draggable-holder {
+        min-height: 200px;
+        border-radius: 20px;
+        border: 2px dashed white;
     }
 
 </style>
