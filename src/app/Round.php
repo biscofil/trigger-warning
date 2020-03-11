@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Round
@@ -17,6 +19,7 @@ use Illuminate\Support\Facades\DB;
  * @property int main_card_id
  * @property boolean opened
  * @property Card cardToFill
+ * @property null|Collection players
  * @method static self|Builder first()
  * @method static self|Builder open()
  */
@@ -38,7 +41,8 @@ class Round extends Model
     /**
      * @return Round|null
      */
-    static function getOpenRound() : ?Round{
+    static function getOpenRound(): ?Round
+    {
         return self::open()
             ->orderBy('id', 'desc')
             ->limit(1)
@@ -99,7 +103,6 @@ class Round extends Model
 
         $newRound = new Round();
 
-
         $users = User::approved();
         if ($users->count() < Round::$UserPerRound) {
             throw new Exception('Servono almeno ' . Round::$UserPerRound . ' stronzi');
@@ -154,7 +157,10 @@ class Round extends Model
      */
     private static function clearPlayersPickedCards(): void
     {
-        Card::picked(true)->update(['user_id' => null]);
+        Card::picked(true)->update([
+            'user_id' => null,
+            'picked' => false
+        ]);
     }
 
     /**
@@ -163,6 +169,8 @@ class Round extends Model
     private function giveCardsToPlayers(): void
     {
 
+        Log::debug("giveCardsToPlayers");
+
         $players = $this->players();
 
         // get the number of needed cards for another round
@@ -170,14 +178,19 @@ class Round extends Model
             return $player->cardsNeeded();
         });
 
+        Log::debug("We need  " . $requiredCardCount . " cards");
+
         $cards = Card::filling()->inMainDeck();
 
         // check if we have enough cards
         if ($cards->count() < $requiredCardCount) {
-            throw new Exception('Non ci sono abbastanza carte');
+            throw new Exception('Non ci sono abbastanza carte, ne servono almeno '
+                . $requiredCardCount . ' ma ce ne sono solo ' . $cards->count());
         }
 
         $cardsToAssign = $cards->limit($requiredCardCount)->get()->shuffle();
+
+        Log::debug("fetched " . $cardsToAssign->count() . " cards");
 
         foreach ($players as $player) {
 
@@ -194,6 +207,23 @@ class Round extends Model
 
         }
 
+    }
+
+    /**
+     * @return bool
+     */
+    public function getReadyToPickAttribute(): bool
+    {
+        foreach ($this->getAttribute('players') as $player) {
+
+            /** @var User $player */
+            if (!$player->getReadyAttribute()) {
+                return false;
+            }
+
+        }
+
+        return true;
     }
 
 }

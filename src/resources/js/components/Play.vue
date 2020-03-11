@@ -2,7 +2,7 @@
 
     <div>
 
-        <Round v-if="round_id" :round_id="round_id"></Round>
+        <Round v-if="round_id" :round_id="round_id" @end="round_id = null"></Round>
 
         <button v-else @click="newRound">
             Nuovo round
@@ -58,7 +58,7 @@
                 axios.post('api/rounds')
                     .then(response => {
 
-                        self.round = response.data.round;
+                        self.round_id = response.data.round.id;
                         self.$toastr.s("Alleluia!");
 
                     })

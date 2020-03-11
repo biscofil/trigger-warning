@@ -6,7 +6,7 @@ use App\Round;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class RoundController
@@ -53,7 +53,16 @@ class RoundController extends Controller
         /** @var Round $round */
         $round->load('host');
         $round->load('cardToFill');
-        $round->setAttribute('players', $round->players());
+
+
+        $players = $round->players();
+        $players->each(function (User $player) {
+            $player->setAttribute('picked_cards',
+                $player->cardsInHand()->picked(true)->get());
+        });
+        $round->setAttribute('players', $players);
+
+        $round->append('ready_to_pick');
 
         return [
             'me' => $me,
@@ -65,36 +74,30 @@ class RoundController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param Round $round
-     * @return Response
-     */
-    public function edit(Round $round)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
      * @param Request $request
      * @param Round $round
-     * @return Response
+     * @param User $winner
+     * @return JsonResponse
      */
-    public function update(Request $request, Round $round)
+    public function close_round(Request $request, Round $round, User $winner)
     {
-        //
+
+        if (!$round->opened) {
+            return response()->json(['error' => 'Round non aperto'], 400);
+        }
+
+        $winner->cardsInHand()->picked()->update([
+            'win_count' => DB::raw('`win_count` + 1 ')
+        ]);
+
+        $winner->score = $winner->score + 1;
+        $winner->save();
+
+        $round->opened = false;
+        $round->save();
+
+        return [];
+
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Round $round
-     * @return Response
-     */
-    public function destroy(Round $round)
-    {
-        //
-    }
 }

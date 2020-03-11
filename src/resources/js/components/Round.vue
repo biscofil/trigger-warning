@@ -38,7 +38,8 @@
                                    :move="onMoveCallback"
                                    id="picked_card_list">
 
-                            <div class="col" v-for="picked_card in orderedPickedCards" :key="picked_card.id"
+                            <div class="col" v-for="picked_card in orderedPickedCards"
+                                 :key="picked_card.id"
                                  :card_id="picked_card.id">
                                 <Card :card="picked_card"></Card>
                             </div>
@@ -50,6 +51,38 @@
                 </div>
 
             </div>
+
+            <hr>
+
+        </div>
+
+        <div class="col-sm-12" v-if="me.id === round.host_user_id">
+
+            <button class="btn btn-lg btn-warning" v-if="!round.ready_to_pick">
+                Manca qualcuno... speta
+            </button>
+
+            <div class="row">
+
+                <div class="col" v-for="player in rand_players" v-if="player.ready">
+
+                    <div class="row">
+
+                        <div class="col-sm-12" align="center"
+                             v-for="picked_card in player.picked_cards">
+                            <Card :card="picked_card" :covered="true" :uncoverable="round.ready_to_pick"></Card>
+                        </div>
+
+                    </div>
+
+                    <button class="btn btn-lg btn-success" v-if="round.ready_to_pick" @click="electWinner(player)">
+                        Ha vinto il merda!
+                    </button>
+
+                </div>
+
+            </div>
+
 
             <hr>
 
@@ -73,7 +106,7 @@
 
                             -->
 
-                            <span v-if="player.id%2==0" class="badge badge-success">
+                            <span v-if="player.ready" class="badge badge-success">
                                 <h4>Carte pescate</h4>
                             </span>
 
@@ -132,6 +165,7 @@
     import PlayerProfile from "./PlayerProfile";
     import Card from "./Card";
     import draggable from 'vuedraggable';
+    import shuffle from 'lodash/shuffle'
 
     export default {
 
@@ -152,19 +186,23 @@
         mounted() {
 
             let self = this;
+            self.fetch();
 
-            axios.get('api/rounds/' + this.round_id)
-                .then(response => {
-                    self.me = response.data.me;
-                    self.round = response.data.round;
-                    self.my_cards = response.data.my_cards;
-                    self.picked_cards = response.data.picked_cards;
-                })
-                .catch(e => {
+            this.$nextTick(function () {
 
-                    self.$toastr.e("Merda...");
+                window.setInterval(() => {
 
-                });
+                    if (self.round) {
+                        if (self.round.ready_to_pick) {
+                            return;
+                        }
+                    }
+
+                    self.fetch();
+
+                }, 5000);
+
+            })
 
         },
 
@@ -173,10 +211,13 @@
                 me: null,
                 round: null,
                 my_cards: null,
-                picked_cards: null
+                picked_cards: null,
+                rand_players: []
             }
         },
+
         computed: {
+
             dragOptions() {
                 return {
                     animation: 0,
@@ -186,14 +227,44 @@
             },
 
             orderedPickedCards() {
-                return this.picked_cards.sort((one, two) => {
-                    return one.order - two.order;
-                });
+                return this.sortCards(this.picked_cards);
             }
 
         },
 
         methods: {
+
+            sortCards(cards) {
+                return cards.sort((one, two) => {
+                    return one.order - two.order;
+                });
+            },
+
+            fetch() {
+                let self = this;
+
+                axios.get('api/rounds/' + this.round_id)
+                    .then(response => {
+                        self.me = response.data.me;
+
+                        self.round = response.data.round;
+
+                        self.round.players = self.round.players.map(function (player) {
+                            player.picked_cards = self.sortCards(player.picked_cards);
+                            return player;
+                        });
+
+                        self.rand_players = shuffle(self.round.players);
+
+                        self.my_cards = response.data.my_cards;
+                        self.picked_cards = response.data.picked_cards;
+                    })
+                    .catch(e => {
+
+                        self.$toastr.e("Merda...");
+
+                    });
+            },
 
             onDrop(evt) {
 
@@ -301,6 +372,20 @@
                     }
 
                 }
+
+            },
+
+            electWinner(player) {
+                let self = this;
+
+                axios.post('api/rounds/' + this.round_id + '/close/' + player.id)
+                    .then(response => {
+                        self.$toastr.s("Ok");
+                        self.$emit('end');
+                    })
+                    .catch(e => {
+                        self.$toastr.e("Merda...");
+                    });
 
             }
 

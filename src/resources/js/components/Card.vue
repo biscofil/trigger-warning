@@ -1,8 +1,8 @@
 <template>
 
-    <div class="card game-card" :class="cardClasses">
+    <div class="card game-card" :class="cardClasses" @click="uncover">
 
-        <div class="card-body" v-html="cardContent"/>
+        <div v-if="!covered" class="card-body" v-html="cardContent"/>
 
     </div>
 
@@ -15,6 +15,16 @@
         props: {
             card: {
                 require: true
+            },
+            covered: {
+                require: false,
+                default: false,
+                type: Boolean
+            },
+            uncoverable: {
+                require: false,
+                default: false,
+                type: Boolean
             }
         },
 
@@ -34,6 +44,13 @@
                     return ['text-dark', 'bg-white'];
                 }
 
+            }
+        },
+        methods: {
+            uncover() {
+                if (this.covered && this.uncoverable) {
+                    this.covered = false;
+                }
             }
         }
     }

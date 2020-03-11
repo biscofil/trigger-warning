@@ -45,6 +45,10 @@ class User extends Authenticatable
         'approved' => 'bool'
     ];
 
+    protected $appends = [
+        'ready'
+    ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -74,8 +78,23 @@ class User extends Authenticatable
     /**
      * @return int
      */
-    public function cardsNeeded() : int{
-        return Card::$CardsPerUser - $this->cardsInHand()->count();
+    public function cardsNeeded(): int
+    {
+        $count = Card::$CardsPerUser - $this->cardsInHand()->count();
+        return $count > 0 ? $count : 0;
     }
+
+    /**
+     * @return bool
+     */
+    public function getReadyAttribute(): bool
+    {
+        $round = Round::getOpenRound();
+        if ($round) {
+            return $this->cardsInHand()->picked()->count() == $round->cardToFill->spaces_count;
+        }
+        return false;
+    }
+
 
 }
