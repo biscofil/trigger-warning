@@ -29,18 +29,23 @@
 
                     <h3>Le tue carte scelte:</h3>
 
-                    <draggable class="row draggable-holder"
-                               v-model="picked_cards"
-                               v-bind="dragOptions"
-                               @end="onDrop"
-                               id="picked_card_list">
+                    <div class="draggable-wrapper">
 
-                        <div class="col" v-for="picked_card in picked_cards" :key="picked_card.id"
-                             :card_id="picked_card.id">
-                            <Card :card="picked_card"></Card>
-                        </div>
+                        <draggable class="row draggable-holder"
+                                   v-model="picked_cards"
+                                   v-bind="dragOptions"
+                                   @end="onDrop"
+                                   :move="onMoveCallback"
+                                   id="picked_card_list">
 
-                    </draggable>
+                            <div class="col" v-for="picked_card in orderedPickedCards" :key="picked_card.id"
+                                 :card_id="picked_card.id">
+                                <Card :card="picked_card"></Card>
+                            </div>
+
+                        </draggable>
+
+                    </div>
 
                 </div>
 
@@ -101,18 +106,20 @@
 
             <h3>Il tuo mazzo</h3>
 
-            <draggable class="draggable-holder row"
-                       v-model="my_cards"
-                       v-bind="dragOptions"
-                       @end="onDrop"
-                       :move="onMoveCallback"
-                       id="deck">
+            <div class="draggable-wrapper">
+                <draggable class="draggable-holder row"
+                           v-model="my_cards"
+                           v-bind="dragOptions"
+                           @end="onDrop"
+                           :move="onMoveCallback"
+                           id="deck">
 
-                <div class="col-sm-2" v-for="card in my_cards" :key="card.id" :card_id="card.id">
-                    <Card :card="card"></Card>
-                </div>
+                    <div class="col-sm-2" v-for="card in my_cards" :key="card.id" :card_id="card.id">
+                        <Card :card="card"></Card>
+                    </div>
 
-            </draggable>
+                </draggable>
+            </div>
 
         </div>
 
@@ -176,7 +183,14 @@
                     group: "user_cards",
                     disabled: false,
                 };
+            },
+
+            orderedPickedCards() {
+                return this.picked_cards.sort((one, two) => {
+                    return one.order - two.order;
+                });
             }
+
         },
 
         methods: {
@@ -185,24 +199,109 @@
 
                 let self = this;
 
-                if (evt.to.id === 'picked_card_list') {
+                let cardId = evt.item.attributes.card_id.value;
 
-                    axios.put('api/rounds/' + this.round.id + '/cards/' + evt.item.attributes.card_id.value)
-                        .then(response => {
-                            self.$toastr.s("OK");
-                        })
-                        .catch(e => {
-                            self.$toastr.e("Errore");
-                        });
+                if (evt.from.id === 'picked_card_list') {
+
+                    // from picked_card_list
+
+                    if (evt.to.id === 'deck') {
+
+                        // to deck
+                        return;
+
+                    } else {
+
+                        // picked_card_list reorder
+
+                        if (evt.oldIndex === evt.newIndex) {
+                            // no call required
+                            return;
+                        }
+
+                        axios.put('api/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
+                            {
+                                'from_pos': evt.oldIndex,
+                                'to_pos': evt.newIndex
+                            }
+                        )
+                            .then(response => {
+                                self.picked_cards = response.data.picked_cards;
+                                self.$toastr.s("OK");
+                            })
+                            .catch(e => {
+                                let error = e.response ? e.response.data.error : e;
+                                self.$toastr.e(error, "Errore");
+                            });
+
+                    }
+
+                } else {
+
+                    // from deck
+
+                    if (evt.to.id === 'picked_card_list') {
+
+                        axios.put('api/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
+                            {
+                                'to_pos': evt.newIndex
+                            }
+                        )
+                            .then(response => {
+                                self.$toastr.s("OK");
+                            })
+                            .catch(e => {
+                                let error = e.response ? e.response.data.error : e;
+                                self.$toastr.e(error, "Errore");
+                            });
+
+                    } else {
+
+                        // deck reorder
+                        return;
+
+                    }
 
                 }
+
             },
 
             onMoveCallback: function (evt, originalEvent) {
-                if (evt.to.id === 'picked_card_list') {
-                    return this.picked_cards.length < this.round.card_to_fill.spaces_count;
+
+                if (evt.from.id === 'picked_card_list') {
+
+                    // from picked_card_list
+
+                    if (evt.to.id === 'deck') {
+
+                        // to deck
+                        return false;
+
+                    } else {
+
+                        // picked_card_list reorder
+                        return true;
+
+                    }
+
+                } else {
+
+                    // from deck
+
+                    if (evt.to.id === 'picked_card_list') {
+
+                        // from deck to picked_card_list
+                        return this.picked_cards.length < this.round.card_to_fill.spaces_count;
+
+                    } else {
+
+                        // deck reorder
+                        return true;
+
+                    }
+
                 }
-                return true;
+
             }
 
         }
@@ -215,6 +314,10 @@
 
     hr {
         border-top: 2px solid rgba(255, 255, 255, 0.28);
+    }
+
+    .draggable-wrapper {
+        padding: 20px;
     }
 
     .draggable-holder {

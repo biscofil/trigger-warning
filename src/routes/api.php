@@ -18,7 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/rounds/{round}', 'RoundController@show');
     Route::post('/rounds', 'RoundController@store');
 
-
+    Route::put('/rounds/{round}/cards/{card}/picked', 'CardController@setPicked');
     //Route::get('deck', 'Auth\AuthController@me');
 
 });

@@ -71,4 +71,11 @@ class User extends Authenticatable
         return $this->hasMany(Card::class);
     }
 
+    /**
+     * @return int
+     */
+    public function cardsNeeded() : int{
+        return Card::$CardsPerUser - $this->cardsInHand()->count();
+    }
+
 }

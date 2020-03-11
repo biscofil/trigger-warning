@@ -18,10 +18,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int spaces_count
  * @property null|int user_id
  * @property null|int creator_user_id
- * @method static Builder toFill()
+ * @property bool picked
+ * @property int order
+ * @method static self|Builder toFill()
+ * @method static self|Builder inMainDeck()
+ * @method static self|Builder filling()
+ * @method static self|Builder picked(bool $true)
  */
 class Card extends Model
 {
+
+    public static $CardsPerUser = 1; //11;
 
     public static $TypeCartToFill = 1;
     public static $TypeFillingCart = 2;
@@ -31,7 +38,7 @@ class Card extends Model
         'type',
         'content',
         'picked',
-        'picked_order',
+        'order', // used for deck and picked cards
         'user_id',
         'usage_count',
         'win_count',
@@ -88,6 +95,15 @@ class Card extends Model
     public function scopeFilling(Builder $query): Builder
     {
         return $query->where('type', '=', self::$TypeFillingCart);
+    }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeInMainDeck(Builder $query): Builder
+    {
+        return $query->whereNull('user_id');
     }
 
     /**

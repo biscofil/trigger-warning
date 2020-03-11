@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Card;
+use App\Round;
+use App\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class CardController
@@ -13,23 +17,71 @@ use Illuminate\Http\Response;
 class CardController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return Response
+     * @param Round $round
+     * @param Card $card
+     * @param Request $request
+     * @return array|JsonResponse
      */
-    public function index()
+    public function setPicked(Round $round, Card $card, Request $request)
     {
-        //
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create()
-    {
-        //
+        $openRound = Round::getOpenRound();
+
+        if (is_null($openRound)) {
+            return response()->json(['error' => 'Nessun round aperto'], 400);
+        }
+
+        if ($openRound->id !== $round->id) {
+            return response()->json(['error' => 'Round non aperto'], 400);
+        }
+
+        /** @var User $user */
+        $me = auth()->user();
+
+        $otherPickedCardsCount = $me->cardsInHand()->picked()->where('id', '<>', $card->id)->count();
+
+        if ($otherPickedCardsCount >= $round->cardToFill->spaces_count) {
+            return response()->json(['error' => 'Carte da scegliere esaurite'], 400);
+        }
+
+        if ($request->has('to_pos')) {
+
+            if ($request->has('from_pos')) {
+
+                // reorder
+
+                $me->cardsInHand()
+                    ->picked()
+                    ->where('id', '<>', $card->id)
+                    ->where('order', '=', $request->get('to_pos'))
+                    ->update([
+                        'order' => $request->get('from_pos')
+                    ]);
+
+            } else {
+
+                // new
+                $me->cardsInHand()
+                    ->picked()
+                    ->where('id', '<>', $card->id)
+                    ->where('order', '=', $request->get('to_pos'))
+                    ->update([
+                        'order' => DB::raw('`order` + 1')
+                    ]);
+
+            }
+
+            $card->order = $request->get('to_pos');
+
+        }
+
+        $card->picked = true;
+        $card->save();
+
+        return [
+            'picked_cards' => $me->cardsInHand()->picked(true)->get()
+        ];
+
     }
 
     /**
@@ -39,28 +91,6 @@ class CardController extends Controller
      * @return Response
      */
     public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param Card $card
-     * @return Response
-     */
-    public function show(Card $card)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param Card $card
-     * @return Response
-     */
-    public function edit(Card $card)
     {
         //
     }

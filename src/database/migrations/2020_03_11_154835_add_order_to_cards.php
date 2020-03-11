@@ -15,7 +15,7 @@ class AddOrderToCards extends Migration
     {
         Schema::table('cards', function (Blueprint $table) {
 
-            $table->unsignedSmallInteger('picked_order')
+            $table->unsignedSmallInteger('order')
                 ->after('picked')
                 ->default(0)
                 ->index();
@@ -32,8 +32,8 @@ class AddOrderToCards extends Migration
     {
         Schema::table('cards', function (Blueprint $table) {
 
-            $table->dropIndex(['picked_order']);
-            $table->dropColumn('picked_order');
+            $table->dropIndex(['order']);
+            $table->dropColumn('order');
 
         });
     }

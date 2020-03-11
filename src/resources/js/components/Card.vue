@@ -46,11 +46,12 @@
     }
 
     .game-card {
+        width: 300px;
+        height: 400px;
         border: 2px solid black;
         border-radius: 15px;
         font-size: 40px;
         margin: 10px;
-        max-width: 400px;
     }
 
 </style>

@@ -25,11 +25,7 @@ class GameController extends Controller
     public function xhr_play()
     {
 
-        // TODO if open round
-        // if use in it
-        // else wait
-
-        $round = Round::orderBy('id', 'desc')->first();
+        $round = Round::getOpenRound();
 
         return [
             'round_id' => $round ? $round->id : null

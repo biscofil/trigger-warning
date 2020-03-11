@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Card;
 use App\Round;
 use App\User;
 use Illuminate\Http\JsonResponse;
@@ -20,37 +19,22 @@ class RoundController extends Controller
      * new round
      *
      * @param Request $request
-     * @return Round|JsonResponse
+     * @return Round|array|JsonResponse
      */
     public function store(Request $request)
     {
 
-        $users = User::approved();
+        try {
 
-        if ($users->count() < 2) { // TODO 3
-            return response()->json(['error' => 'Servono almeno 3 stronzi'], 400);
+            $newRound = Round::newRound();
+
+        } catch (\Exception $e) {
+
+            return response()->json(['error' => $e->getMessage()], 400);
+
         }
 
-        $cardsToFill = Card::toFill()->inRandomOrder();
-
-        if ($cardsToFill->count() == 0) {
-            return response()->json(['error' => 'Serve almeno una carta'], 400);
-        }
-
-
-        $newRound = new Round();
-
-        /** @var User $host */
-        $host = $users->first();
-        $newRound->host_user_id = $host->id;
-
-        /** @var Card $mainCard */
-        $mainCard = $cardsToFill->first();
-        $newRound->main_card_id = $mainCard->id;
-
-        $newRound->save();
-
-        return $newRound;
+        return $this->show($newRound);
 
     }
 
