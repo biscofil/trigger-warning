@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Log;
 class Round extends Model
 {
 
-    public static $UserPerRound = 2; // TODO make 3;
+    public static $UserPerRound = 3;
 
     protected $fillable = [
         'host_user_id',

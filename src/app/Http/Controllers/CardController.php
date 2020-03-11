@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 /**
  * Class CardController
@@ -88,11 +89,27 @@ class CardController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return Response
+     * @return array|Response
      */
     public function store(Request $request)
     {
-        //
+
+        /** @var User $user */
+        $me = auth()->user();
+
+        $validatedData = $request->validate([
+            'content' => ['required', 'max:255'],
+            'type' => ['required', 'numeric', Rule::in([Card::$TypeCartToFill, Card::$TypeFillingCart])],
+        ]);
+
+        Card::create([
+            'content' => $validatedData['content'],
+            'type' => $validatedData['type'],
+            'creator_user_id' => $me->id
+        ]);
+
+        return [];
+
     }
 
     /**

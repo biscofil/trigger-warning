@@ -15,6 +15,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/game', 'GameController@xhr_play');
 
+    Route::post('/cards', 'CardController@store');
+
     Route::post('/rounds', 'RoundController@store');
 
     Route::get('/rounds/{round}', 'RoundController@show');

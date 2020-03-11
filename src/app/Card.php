@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Card extends Model
 {
 
-    public static $CardsPerUser = 1; //11;
+    public static $CardsPerUser = 11;
 
     public static $TypeCartToFill = 1;
     public static $TypeFillingCart = 2;
