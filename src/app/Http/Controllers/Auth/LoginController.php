@@ -86,7 +86,7 @@ class LoginController extends Controller
                 if ($existingUser->approved) {
 
                     // log them in
-                    auth()->login($existingUser, true);
+                    auth()->login($existingUser);
 
                     return redirect()->route('play');
 
