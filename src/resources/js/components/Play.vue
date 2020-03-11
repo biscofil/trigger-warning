@@ -4,7 +4,7 @@
 
         <Round v-if="round_id" :round_id="round_id" @end="round_id = null"></Round>
 
-        <button v-else @click="newRound">
+        <button class="btn btn-lg btn-success" v-else @click="newRound">
             Nuovo round
         </button>
 
