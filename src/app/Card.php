@@ -31,6 +31,7 @@ class Card extends Model
         'type',
         'content',
         'picked',
+        'picked_order',
         'user_id',
         'usage_count',
         'win_count',
