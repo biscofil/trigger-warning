@@ -58,9 +58,9 @@
 
         <div class="col-sm-12" v-if="me.id === round.host_user_id">
 
-            <button class="btn btn-lg btn-warning" v-if="!round.ready_to_pick">
-                Manca qualcuno... speta
-            </button>
+            <span v-else class="badge badge-warning" v-if="!round.ready_to_pick">
+                <h4>Manca qualcuno!</h4>
+            </span>
 
             <div class="row">
 
@@ -76,13 +76,12 @@
                     </div>
 
                     <button class="btn btn-lg btn-success" v-if="round.ready_to_pick" @click="electWinner(player)">
-                        Ha vinto il merda!
+                        Eleggi vincitore!
                     </button>
 
                 </div>
 
             </div>
-
 
             <hr>
 
