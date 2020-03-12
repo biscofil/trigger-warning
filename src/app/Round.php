@@ -114,11 +114,11 @@ class Round extends Model
 
         $newRound->getNewHost();
 
-        $newRound->getMainCardToBeFilled();
-
         DB::beginTransaction();
 
         try {
+
+            $newRound->getMainCardToBeFilled();
 
             // Assign cards
             $newRound->giveCardsToPlayers();
@@ -205,7 +205,11 @@ class Round extends Model
      */
     private function getMainCardToBeFilled(): void
     {
-        $mainCard = Card::toFill()->inRandomOrder()->first();
+        $mainCard = Card::toFill()
+            ->orderBy('usage_count', 'asc')
+            ->orderBy('updated_at', 'asc')
+            //->inRandomOrder()
+            ->first();
 
         if (is_null($mainCard)) {
             throw new GameException('Serve almeno una carta da riempire');
@@ -213,6 +217,10 @@ class Round extends Model
 
         /** @var Card $mainCard */
         $this->main_card_id = $mainCard->id;
+
+        $mainCard->usage_count = $mainCard->usage_count + 1;
+        $mainCard->save();
+
     }
 
     /**
@@ -276,7 +284,12 @@ class Round extends Model
                 . $requiredCardCount . ' ma ce ne sono solo ' . $cards->count());
         }
 
-        $cardsToAssign = $cards->limit($requiredCardCount)->get()->shuffle();
+        $cardsToAssign = $cards
+            ->limit($requiredCardCount)
+            ->orderBy('usage_count', 'asc')
+            ->orderBy('updated_at', 'asc')
+            ->get()
+            ->shuffle();
 
         Log::debug("fetched " . $cardsToAssign->count() . " cards");
 
@@ -326,7 +339,9 @@ class Round extends Model
                 $card = $cardsToAssign->pop();
 
                 // TODO fix : Call to a member function owner() on null
-                $card->owner()->associate($player)->save();
+                $card->owner()->associate($player);
+                $card->usage_count = $card->usage_count + 1;
+                $card->save();
 
             }
 
