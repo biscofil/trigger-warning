@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Exceptions\GameException;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -25,8 +26,6 @@ use Illuminate\Support\Facades\Log;
  */
 class Round extends Model
 {
-
-    public static $UserPerRound = 3;
 
     protected $fillable = [
         'host_user_id',
@@ -58,7 +57,6 @@ class Round extends Model
         return $query->where('opened', '=', true);
     }
 
-
     /**
      * @return BelongsTo
      */
@@ -69,9 +67,11 @@ class Round extends Model
 
     /**
      */
-    public function players()
+    public function players(): Collection
     {
-        return User::approved()->where('id', '<>', $this->host_user_id)->get();
+        return User::approved()
+            ->where('id', '<>', $this->host_user_id)
+            ->get();
     }
 
     /**
@@ -90,22 +90,77 @@ class Round extends Model
         return $this->hasMany(Card::class);
     }
 
+    // ############################ NEW ROUND #################################
+
     /**
      * @return Round
+     * @throws GameException
      * @throws Exception
      */
     public static function newRound(): Round
     {
 
+        Log::debug("#### NEW ROUND ####");
+
         self::checkOpenRounds();
 
         self::clearPlayersPickedCards();
 
+        self::clearPlayersDeck();
+
+        self::checkNumberOfPlayers();
+
         $newRound = new Round();
 
-        if (User::approved()->count() < Round::$UserPerRound) {
-            throw new Exception('Servono almeno ' . Round::$UserPerRound . ' stronzi');
+        $newRound->getNewHost();
+
+        $newRound->getMainCardToBeFilled();
+
+        DB::beginTransaction();
+
+        try {
+
+            // Assign cards
+            $newRound->giveCardsToPlayers();
+
+            $newRound->opened = true;
+            $newRound->save();
+
+            DB::commit();
+
+            Log::debug("Created round " . $newRound->id);
+
+        } catch (Exception $exception) {
+
+            DB::rollBack();
+
+            Log::error($exception->getMessage());
+
+            throw $exception;
+
         }
+
+        return $newRound;
+    }
+
+    /**
+     * @throws GameException
+     */
+    private static function checkNumberOfPlayers(): void
+    {
+        $minUsersForRound = config('game.min_users_for_round');
+        if (User::approved()->count() < $minUsersForRound) {
+            throw new GameException('Servono almeno ' . $minUsersForRound . ' stronzi');
+        }
+
+    }
+
+    /**
+     * @return void
+     * @throws GameException
+     */
+    private function getNewHost(): void
+    {
 
         $host = null;
 
@@ -138,48 +193,35 @@ class Round extends Model
         }
 
         if (is_null($host)) {
-            throw new Exception("Errore durante l'elezione del nuovo host");
+            throw new GameException("Errore durante l'elezione del nuovo host");
         }
 
-        $newRound->host_user_id = $host->id;
+        $this->host_user_id = $host->id;
 
-        $mainCard = Card::toFill()->inRandomOrder()->first();
-        if (is_null($mainCard)) {
-            throw new Exception('Serve almeno una carta da riempire');
-        }
-        /** @var Card $mainCard */
-        $newRound->main_card_id = $mainCard->id;
-
-        DB::beginTransaction();
-
-        try {
-
-            // Assign cards
-            $newRound->giveCardsToPlayers();
-
-            $newRound->opened = true;
-            $newRound->save();
-
-            DB::commit();
-
-        } catch (Exception $exception) {
-
-            DB::rollBack();
-
-            throw  $exception;
-
-        }
-
-        return $newRound;
     }
 
     /**
-     * @throws Exception
+     * @throws GameException
+     */
+    private function getMainCardToBeFilled(): void
+    {
+        $mainCard = Card::toFill()->inRandomOrder()->first();
+
+        if (is_null($mainCard)) {
+            throw new GameException('Serve almeno una carta da riempire');
+        }
+
+        /** @var Card $mainCard */
+        $this->main_card_id = $mainCard->id;
+    }
+
+    /**
+     * @throws GameException
      */
     private static function checkOpenRounds(): void
     {
         if (Round::open()->count()) {
-            throw new Exception('Ci sono round aperti!');
+            throw new GameException('Ci sono round aperti!');
         }
     }
 
@@ -195,7 +237,25 @@ class Round extends Model
     }
 
     /**
-     * @throws Exception
+     *
+     */
+    private static function clearPlayersDeck(): void
+    {
+
+        if (config('game.reset_cards_every_round')) {
+
+            Log::debug("Clearing all the user decks");
+
+            Card::query()
+                ->whereNotNull('user_id') // in someone's deck
+                ->update(['user_id' => null]); // reset
+
+        }
+
+    }
+
+    /**
+     * @throws GameException
      */
     private function giveCardsToPlayers(): void
     {
@@ -204,12 +264,7 @@ class Round extends Model
 
         $players = $this->players();
 
-        // get the number of needed cards for another round
-        $requiredCardCount = $players->sum(function (User $player) {
-            return $player->cardsNeeded();
-        });
-
-        Log::debug("We need  " . $requiredCardCount . " cards");
+        $requiredCardCount = $this->getRequiredCards($players);
 
         $cards = Card::filling()->inMainDeck();
 
@@ -217,7 +272,7 @@ class Round extends Model
 
         // check if we have enough cards
         if ($cards->count() < $requiredCardCount) {
-            throw new Exception('Non ci sono abbastanza carte, ne servono almeno '
+            throw new GameException('Non ci sono abbastanza carte, ne servono almeno '
                 . $requiredCardCount . ' ma ce ne sono solo ' . $cards->count());
         }
 
@@ -225,32 +280,94 @@ class Round extends Model
 
         Log::debug("fetched " . $cardsToAssign->count() . " cards");
 
+        $this->assignCards($cardsToAssign, $players);
+
+    }
+
+    /**
+     * @param Collection $players
+     * @return int
+     */
+    private function getRequiredCards(Collection $players): int
+    {
+
+        // only given missing card
+
+        // get the number of needed cards for another round
+        $requiredCardCount = $players->sum(function (User $player) {
+            return $player->cardsNeeded();
+        });
+
+        // TODO return collection with userid => needed
+
+        Log::debug("We need " . $requiredCardCount . " cards");
+
+        return $requiredCardCount;
+    }
+
+    /**
+     * @param Collection $cardsToAssign
+     * @param Collection $players
+     */
+    private function assignCards(Collection $cardsToAssign, Collection $players): void
+    {
+
         foreach ($players as $player) {
 
             /** @var User $player */
 
-            Log::debug("user " . $player->id . " needs " . $player->cardsNeeded() . " cards");
+            $cardsNeeded = $player->cardsNeeded();
 
-            for ($a = 0; $a <= $player->cardsNeeded(); $a++) {
+            for ($a = 0; $a < $cardsNeeded; $a++) {
 
                 Log::debug("adding card to user " . $player->id);
 
                 /** @var Card $card */
                 $card = $cardsToAssign->pop();
 
+                // TODO fix : Call to a member function owner() on null
                 $card->owner()->associate($player)->save();
 
             }
 
         }
+    }
+
+    // ############################# CLOSE ROUND ################################
+
+    /**
+     * @param User $winner
+     * @return void
+     * @throws GameException
+     */
+    public function close(User $winner): void
+    {
+
+        if (!$this->opened) {
+            throw new GameException('Round non aperto');
+        }
+
+        $winner->cardsInHand()->picked()->update([
+            'win_count' => DB::raw('`win_count` + 1 ')
+        ]);
+
+        $winner->score = $winner->score + 1;
+        $winner->save();
+
+        $this->opened = false;
+        $this->save();
 
     }
+
+
+    // #############################################################
 
     /**
      * @return bool
      */
     public function getReadyToPickAttribute(): bool
     {
+
         foreach ($this->getAttribute('players') as $player) {
 
             /** @var User $player */

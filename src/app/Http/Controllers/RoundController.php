@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\GameException;
 use App\Round;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Class RoundController
@@ -20,6 +20,7 @@ class RoundController extends Controller
      *
      * @param Request $request
      * @return Round|array|JsonResponse
+     * @throws \Exception
      */
     public function store(Request $request)
     {
@@ -28,7 +29,7 @@ class RoundController extends Controller
 
             $newRound = Round::newRound();
 
-        } catch (\Exception $e) {
+        } catch (GameException $e) {
 
             return response()->json(['error' => $e->getMessage()], 400);
 
@@ -54,7 +55,6 @@ class RoundController extends Controller
         $round->load('host');
         $round->load('cardToFill');
 
-
         $players = $round->players();
         $players->each(function (User $player) {
             $player->setAttribute('picked_cards',
@@ -77,24 +77,20 @@ class RoundController extends Controller
      * @param Request $request
      * @param Round $round
      * @param User $winner
-     * @return JsonResponse
+     * @return array|JsonResponse
      */
     public function close_round(Request $request, Round $round, User $winner)
     {
 
-        if (!$round->opened) {
-            return response()->json(['error' => 'Round non aperto'], 400);
+        try {
+
+            $round->close($winner);
+
+        } catch (GameException $e) {
+
+            return response()->json(['error' => $e->getMessage()], 400);
+
         }
-
-        $winner->cardsInHand()->picked()->update([
-            'win_count' => DB::raw('`win_count` + 1 ')
-        ]);
-
-        $winner->score = $winner->score + 1;
-        $winner->save();
-
-        $round->opened = false;
-        $round->save();
 
         return [];
 

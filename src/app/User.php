@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class User
@@ -80,7 +81,14 @@ class User extends Authenticatable
      */
     public function cardsNeeded(): int
     {
-        $count = Card::$CardsPerUser - $this->cardsInHand()->count();
+        $cardsInHand = $this->cardsInHand()->count();
+
+        $cardsPerUser = config('game.cards_per_user');
+
+        Log::debug("User " . $this->id .
+            " has " . $cardsInHand . "/" . $cardsPerUser . " cards in hand");
+
+        $count = $cardsPerUser - $cardsInHand;
         return $count > 0 ? $count : 0;
     }
 
