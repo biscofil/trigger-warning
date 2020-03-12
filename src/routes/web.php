@@ -13,8 +13,12 @@
 
 Route::get('/', 'HomeController@index')->name('homepage');
 
-Route::get('/redirect', 'Auth\LoginController@redirectToProvider')->name('login');
-Route::get('/callback', 'Auth\LoginController@handleProviderCallback');
+Route::middleware('guest')->group(function () {
+
+    Route::get('/redirect', 'Auth\LoginController@redirectToProvider')->name('login');
+    Route::get('/callback', 'Auth\LoginController@handleProviderCallback');
+
+});
 
 Route::middleware('auth')->group(function () {
 
