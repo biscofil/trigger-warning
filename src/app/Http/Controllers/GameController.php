@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Card;
 use App\Round;
 use App\User;
 use Illuminate\Http\JsonResponse;
@@ -45,7 +46,11 @@ class GameController extends Controller
 
         return [
             'round_id' => $round ? $round->id : null,
-            'users' => User::approved()->where('id', '<>', $me->id)->get()
+            'users' => User::approved()->where('id', '<>', $me->id)->get(),
+            'cards' => [
+                'to_fill' => Card::toFill()->count(),
+                'filling' => Card::filling()->count()
+            ]
         ];
 
     }

@@ -33,9 +33,20 @@
 
         <hr>
 
-        <button class="btn btn-lg btn-info" @click="newCard">
-            Nuova carta
-        </button>
+
+        <div class="col-sm-12" v-if="cards">
+
+            <p>
+                Carte da riempire: {{cards.to_fill}}
+                <br>
+                Carte riempitive: {{cards.filling}}
+            </p>
+
+            <button class="btn btn-lg btn-info" @click="newCard">
+                Nuova carta
+            </button>
+
+        </div>
 
         <modals-container/>
 
@@ -60,6 +71,7 @@
 
         data() {
             return {
+                cards : null,
                 users: null,
                 round_id: null
             }
@@ -73,6 +85,7 @@
                 .then(response => {
 
                     self.users = response.data.users;
+                    self.cards = response.data.cards;
                     self.round_id = response.data.round_id;
 
                 })
