@@ -70,6 +70,7 @@ class Round extends Model
     public function players(): Collection
     {
         return User::approved()
+            ->active()
             ->where('id', '<>', $this->host_user_id)
             ->get();
     }
@@ -149,7 +150,7 @@ class Round extends Model
     private static function checkNumberOfPlayers(): void
     {
         $minUsersForRound = config('game.min_users_for_round');
-        if (User::approved()->count() < $minUsersForRound) {
+        if (User::approved()->active()->count() < $minUsersForRound) {
             throw new GameException('Servono almeno ' . $minUsersForRound . ' stronzi');
         }
 
@@ -169,13 +170,14 @@ class Round extends Model
             // first round ever
 
             /** @var User $host */
-            $host = User::approved()->first();
+            $host = User::approved()->active()->first();
 
         } else {
 
             /** @var Round $lastRound */
 
             $host = User::approved()
+                ->active()
                 ->where('id', '>', $lastRound->host_user_id)
                 ->orderBy('id', 'asc')
                 ->first();
@@ -185,6 +187,7 @@ class Round extends Model
                 //last registered user, start from the first ID
 
                 $host = User::approved()
+                    ->active()
                     ->orderBy('id', 'asc')
                     ->first();
 

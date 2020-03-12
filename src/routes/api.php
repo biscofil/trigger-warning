@@ -15,14 +15,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/game', 'GameController@xhr_play');
 
+    Route::post('/users/{user}/active/{active}', 'GameController@setUserActive');
+
     Route::post('/cards', 'CardController@store');
 
     Route::post('/rounds', 'RoundController@store');
-
     Route::get('/rounds/{round}', 'RoundController@show');
-
     Route::put('/rounds/{round}/cards/{card}/picked', 'CardController@setPicked');
-
     Route::post('/rounds/{round}/close/{winner}', 'RoundController@close_round');
 
     //Route::get('deck', 'Auth\AuthController@me');

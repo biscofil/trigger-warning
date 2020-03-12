@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
  * @property mixed name
  * @property mixed email
  * @property bool approved
+ * @property bool active
  * @property int score
  *
  * @property mixed provider
@@ -23,7 +24,8 @@ use Illuminate\Support\Facades\Log;
  * @property mixed avatar_original
  *
  * @package App
- * @method static Builder approved()
+ * @method static Builder|self approved()
+ * @method static Builder|self active()
  */
 class User extends Authenticatable
 {
@@ -37,13 +39,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'email', 'approved',
+        'active',
         'score',
         'provider', 'provider_id',
         'avatar', 'avatar_original'
     ];
 
     protected $casts = [
-        'approved' => 'bool'
+        'approved' => 'bool',
+        'active' => 'bool'
     ];
 
     protected $appends = [
@@ -67,6 +71,16 @@ class User extends Authenticatable
     {
         return $query->where('approved', '=', true);
     }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('active', '=', true);
+    }
+
 
     /**
      * @return HasMany
