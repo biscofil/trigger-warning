@@ -6,7 +6,7 @@
             Nuova carta
         </div>
 
-        <div class="card-body">
+        <div class="card-body text-dark bg-white">
 
             <div class="row">
 
