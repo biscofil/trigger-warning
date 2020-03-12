@@ -2,7 +2,7 @@
 
 @section('scripts')
 
-    <script src="{{asset('js/app.js')}}"></script>
+    <script src="{{nocacheasset('js/app.js')}}"></script>
 
 @endsection
 
