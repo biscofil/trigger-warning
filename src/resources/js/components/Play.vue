@@ -38,7 +38,7 @@
         <hr>
 
 
-        <div class="col-sm-12" v-if="cards">
+        <div class="col-sm-12" v-if="cards" align="center">
 
             <p>
                 Carte da riempire: {{cards.to_fill}}
