@@ -4,7 +4,11 @@
 
         <Round v-if="round_id" :round_id="round_id" @end="round_id = null"></Round>
 
-        <div class="col-sm-12" v-else>
+        <div class="col-sm-12" align="center" v-else>
+
+            <PlayerProfile :player="me"></PlayerProfile>
+
+            <hr>
 
             <h1>Nuova partita</h1>
 
@@ -58,6 +62,7 @@
     import VModal from 'vue-js-modal'
     import NewCardModal from "./NewCardModal";
     import Round from "./Round";
+    import PlayerProfile from "./PlayerProfile";
 
     Vue.use(VModal, {dynamic: true, dynamicDefaults: {clickToClose: false}})
 
@@ -66,12 +71,14 @@
         name: 'Play',
 
         components: {
+            PlayerProfile,
             Round
         },
 
         data() {
             return {
-                cards : null,
+                me: null,
+                cards: null,
                 users: null,
                 round_id: null
             }
@@ -84,6 +91,7 @@
             axios.get('api/game')
                 .then(response => {
 
+                    self.me = response.data.me;
                     self.users = response.data.users;
                     self.cards = response.data.cards;
                     self.round_id = response.data.round_id;

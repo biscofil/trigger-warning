@@ -45,6 +45,7 @@ class GameController extends Controller
         $round = Round::getOpenRound();
 
         return [
+            'me' => $me,
             'round_id' => $round ? $round->id : null,
             'users' => User::approved()->where('id', '<>', $me->id)->get(),
             'cards' => [
