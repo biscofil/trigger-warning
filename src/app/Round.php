@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Exceptions\GameException;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -208,9 +209,14 @@ class Round extends Model
      */
     private function getMainCardToBeFilled(): void
     {
+
+        $now = Carbon::now();
+        $date = $now->subDay();
+
         $mainCard = Card::toFill()
             ->orderBy('usage_count', 'asc')
             ->orderBy('updated_at', 'asc')
+            ->where('created_at', '<', $date->toDateTimeString())
             //->inRandomOrder()
             ->first();
 
@@ -277,9 +283,14 @@ class Round extends Model
 
         $requiredCardCount = $this->getRequiredCards($players);
 
-        $cards = Card::filling()->inMainDeck();
+        $now = Carbon::now();
+        $date = $now->subDay();
 
-        // TODO give priority to older or not used
+        $cards = Card::filling()
+            ->inMainDeck()
+            ->where('created_at', '<', $date->toDateTimeString());
+
+        // give priority to older or not used
 
         // check if we have enough cards
         if ($cards->count() < $requiredCardCount) {
