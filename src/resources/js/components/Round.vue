@@ -56,7 +56,7 @@
 
         </div>
 
-        <div class="col-sm-12" v-if="me.id === round.host_user_id">
+        <div class="col-sm-12" v-if="me.id === round.host_user_id" align="center">
 
             <span v-else class="badge badge-warning" v-if="!round.ready_to_pick">
                 <h4>Manca qualcuno!</h4>
@@ -64,7 +64,7 @@
 
             <div class="row">
 
-                <div class="col" v-for="player in rand_players" v-if="player.ready">
+                <div class="col" v-for="player in rand_players" v-if="player.ready" align="center">
 
                     <div class="row">
 

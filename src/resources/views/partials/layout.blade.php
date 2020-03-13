@@ -14,16 +14,8 @@
 
 </head>
 <body>
-<div>
-    @if (Route::has('login'))
-        <div class="top-right links">
-            @auth
-                <a href="{{ route('play') }}">Gioca</a>
-            @else
-                <a href="{{ route('login') }}">Login</a>
-            @endauth
-        </div>
-    @endif
+
+<div class="container-fluid">
 
     @if ($errors->any())
         @foreach ($errors->all() as $error)
@@ -33,11 +25,7 @@
         @endforeach
     @endif
 
-    <div class="content">
-
-        @yield('content')
-
-    </div>
+    @yield('content')
 
 </div>
 
