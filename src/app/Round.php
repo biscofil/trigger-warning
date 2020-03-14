@@ -211,7 +211,7 @@ class Round extends Model
     {
 
         $now = Carbon::now();
-        $date = $now->subDay();
+        $date = $now->subHours(6);
 
         $mainCard = Card::toFill()
             ->orderBy('usage_count', 'asc')
@@ -284,7 +284,7 @@ class Round extends Model
         $requiredCardCount = $this->getRequiredCards($players);
 
         $now = Carbon::now();
-        $date = $now->subDay();
+        $date = $now->subHours(6);
 
         $cards = Card::filling()
             ->inMainDeck()
