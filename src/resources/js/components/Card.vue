@@ -2,7 +2,9 @@
 
     <div class="card game-card" :class="cardClasses" @click="uncover">
 
-        <div v-if="!covered" class="card-body" v-html="cardContent"/>
+        <div v-if="!covered" class="card-body">
+            {{cardContent}}
+        </div>
 
     </div>
 
