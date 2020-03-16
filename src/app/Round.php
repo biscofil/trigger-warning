@@ -300,8 +300,9 @@ class Round extends Model
 
         $cardsToAssign = $cards
             ->limit($requiredCardCount)
-            ->orderBy('usage_count', 'asc')
-            ->orderBy('updated_at', 'asc')
+            ->inRandomOrder()
+            //->orderBy('usage_count', 'asc')
+            //->orderBy('updated_at', 'asc')
             ->get()
             ->shuffle();
 
