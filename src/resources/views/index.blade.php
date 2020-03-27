@@ -8,8 +8,6 @@
             Trigger Warning
         </div>
 
-        <img src="{{asset('img/trigger_lady.jpg')}}">
-
         <div>
             @auth
                 <a class="btn btn-success" href="{{ route('play') }}">Gioca</a>
