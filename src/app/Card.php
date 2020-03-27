@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static self|Builder toFill()
  * @method static self|Builder inMainDeck()
  * @method static self|Builder filling()
+ * @method static self|Builder smartRandom()
  * @method static self|Builder picked(bool $true)
  */
 class Card extends Model
@@ -65,6 +66,15 @@ class Card extends Model
             $builder->where('approved', '=', true);
         });*/
 
+    }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeSmartRandom(Builder $query): Builder
+    {
+        return $query->orderByRaw('( usage_count - win_count + DATEDIFF( NOW() , updated_at )  + ( RAND() * 10 ) ) ASC');
     }
 
     /**

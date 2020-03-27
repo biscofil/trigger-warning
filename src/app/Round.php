@@ -211,13 +211,11 @@ class Round extends Model
     {
 
         $now = Carbon::now();
-        $date = $now->subHours(6);
+        $date = $now->subHours(1);
 
         $mainCard = Card::toFill()
-            ->orderBy('usage_count', 'asc')
-            ->orderBy('updated_at', 'asc')
             ->where('created_at', '<', $date->toDateTimeString())
-            //->inRandomOrder()
+            ->smartRandom()
             ->first();
 
         if (is_null($mainCard)) {
@@ -284,7 +282,7 @@ class Round extends Model
         $requiredCardCount = $this->getRequiredCards($players);
 
         $now = Carbon::now();
-        $date = $now->subHours(6);
+        $date = $now->subHours(1);
 
         $cards = Card::filling()
             ->inMainDeck()
@@ -300,9 +298,7 @@ class Round extends Model
 
         $cardsToAssign = $cards
             ->limit($requiredCardCount)
-            ->inRandomOrder()
-            //->orderBy('usage_count', 'asc')
-            //->orderBy('updated_at', 'asc')
+            ->smartRandom()
             ->get()
             ->shuffle();
 
