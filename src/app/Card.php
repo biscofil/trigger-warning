@@ -74,7 +74,13 @@ class Card extends Model
      */
     public function scopeSmartRandom(Builder $query): Builder
     {
-        return $query->orderByRaw('( usage_count - win_count +  20 - (  DATEDIFF( NOW(), updated_at ))  * 10 + ( RAND() * 20 ) ) ASC');
+        return $query->orderByRaw('
+        (
+	usage_count
+	- win_count
+	+ ( 100 /( DATEDIFF( NOW() , updated_at ) + 1 ) )
+	+ ( RAND() * 20 )
+	) ASC');
     }
 
     /**
