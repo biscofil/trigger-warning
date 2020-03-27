@@ -1,6 +1,6 @@
 <template>
 
-    <div class="card bg-secondary text-white player-card">
+    <div class="card bg-secondary text-white player-card" v-if="player">
 
         <img class="card-img-top" :src="player.avatar" :alt="player.name">
 
