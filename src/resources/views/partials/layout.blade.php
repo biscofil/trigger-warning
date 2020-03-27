@@ -29,6 +29,8 @@
     <meta name="msapplication-TileImage" content="{{asset('favicon/ms-icon-144x144.png')}}">
     <meta name="theme-color" content="#343a40">
 
+    <meta name="robots" content="noindex, nofollow">
+
 </head>
 <body>
 
