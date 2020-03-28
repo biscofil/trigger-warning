@@ -74,13 +74,33 @@ class Card extends Model
      */
     public function scopeSmartRandom(Builder $query): Builder
     {
-        return $query->orderByRaw('
-        (
-	usage_count
-	- win_count
-	+ ( 100 /( DATEDIFF( NOW() , updated_at ) + 1 ) )
-	+ ( RAND() * 20 )
-	) ASC');
+
+        $usageCountMultiplier = config('game.card_random.usage_count_multiplier');
+        $winCountMultiplier = config('game.card_random.win_count_multiplier');
+        $randomMultiplier = config('game.card_random.random_multiplier');
+        $daysMultiplier = config('game.card_random.days_multiplier');
+
+        // TODO normalize every parameter to 0/1
+
+        // usage count is 1 if the card is the most used one
+        // usage count is 0 if the card is the least used one
+        $usageCountNormalized = "usage_count / ( SELECT MAX(usage_count) + 1 FROM cards )";
+
+        // win count is 1 if the card is the most winning one
+        // win count is 0 if the card is the least winning one
+        $winCountNormalized = "win_count / ( SELECT MAX(win_count) + 1 FROM cards )";
+
+        $daysSinceLastUpdate = "DATEDIFF( NOW() , updated_at )";
+
+        $daysSinceLastUpdateNormalized = "$daysSinceLastUpdate / ( SELECT MAX($daysSinceLastUpdate) + 1  FROM cards)";
+
+        return $query->orderByRaw("(
+                ( ($usageCountNormalized)           * $usageCountMultiplier )
+            +   ( ($winCountNormalized)             * $winCountMultiplier )
+            +   ( ($daysSinceLastUpdateNormalized)  * $daysMultiplier )
+            +   ( RAND()                            * $randomMultiplier )
+        ) ASC");
+
     }
 
     /**
