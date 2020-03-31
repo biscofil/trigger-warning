@@ -81,6 +81,45 @@ class User extends Authenticatable
         return $query->where('active', '=', true);
     }
 
+    /**
+     *
+     */
+    public function generateCardsWithUserName(): void
+    {
+
+        $n = $this->name;
+
+        $cardsToFill = [
+            "A $n piace @",
+            "$n non può fare a meno di @",
+            "L'hobby preferito di $n? Sicuramente @",
+            "Che merda! $n... Non puoi @ davanti a tutti",
+        ];
+
+        foreach ($cardsToFill as $cardToFill){
+
+            $c = new Card();
+            $c->type = Card::$TypeCartToFill;
+            $c->content = $cardToFill;
+            $c->save();
+
+        }
+
+        $fillingCards = [
+            "$n", // just the name
+            "schiaffeggiare $n",
+        ];
+
+        foreach ($fillingCards as $fillingCard){
+
+            $c = new Card();
+            $c->type = Card::$TypeFillingCart;
+            $c->content = $fillingCard;
+            $c->save();
+
+        }
+
+    }
 
     /**
      * @return HasMany
