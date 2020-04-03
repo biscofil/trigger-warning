@@ -106,13 +106,13 @@ class WordRound extends Model
 
         self::checkOpenRounds();
 
-        self::checkNumberOfCards();
 
         self::checkNumberOfPlayers();
 
         $newRound = new self();
-
         $newRound->setGuessingUser();
+
+        $newRound->checkNumberOfCards();
         $newRound->setSuggestingUsers();
         $newRound->setWord();
         $newRound->opened = true;
@@ -138,9 +138,12 @@ class WordRound extends Model
      *
      * @throws GameException
      */
-    private static function checkNumberOfCards(): void
+    private function checkNumberOfCards(): void
     {
-        if (Word::query()->where('usage_count', '=', 0)->count() == 0) {
+        if (Word::query()
+                ->where('usage_count', '=', 0)
+                ->where('creator_user_id', '<>', $this->guessing_user_id)
+                ->count() == 0) {
             throw new GameException('Mancano parole...');
         }
     }
@@ -163,6 +166,7 @@ class WordRound extends Model
 
         $word = Word::query()
             ->where('usage_count', '=', 0)
+            ->where('creator_user_id', '<>', $this->guessing_user_id)
             ->inRandomOrder()
             ->first();
 
