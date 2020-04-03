@@ -24,7 +24,17 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
 
-    Route::get('/home', 'GameController@play')->name('play');
+    Route::prefix('games')->group(function () {
+
+        Route::prefix('trigger_warning')->namespace('TriggerWarning')->group(function () {
+            Route::get('/', 'TriggerWarningController@index')->name('play.trigger_warning');
+        });
+
+        Route::prefix('one_word_each')->namespace('OneWordEach')->group(function () {
+            Route::get('/', 'OneWordEachController@index')->name('play.one_word_each');
+        });
+
+    });
 
 });
 

@@ -48,7 +48,7 @@
 
 </div>
 
-@yield('scripts')
+<script src="{{nocacheasset('js/app.js')}}"></script>
 
 </body>
 </html>

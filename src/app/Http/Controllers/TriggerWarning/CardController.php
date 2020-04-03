@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\TriggerWarning;
 
 use App\Card;
+use App\Http\Controllers\Controller;
 use App\Round;
 use App\User;
 use Illuminate\Http\JsonResponse;

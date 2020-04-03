@@ -31,7 +31,9 @@ Vue.use(window.toastr);
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('play-component', require('./components/Play.vue').default);
+Vue.component('home', require('./components/Home.vue').default);
+Vue.component('trigger-warning', require('./components/TriggerWarning/Play.vue').default);
+Vue.component('one-word-each', require('./components/OneWordEach/Play.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

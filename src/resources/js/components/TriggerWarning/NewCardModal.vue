@@ -93,7 +93,7 @@
         methods: {
             save() {
                 let self = this;
-                axios.post('api/cards', this.newCard)
+                axios.post('/api/games/trigger_warning/cards', this.newCard)
                     .then(response => {
                         self.newCard.content = "";
                         self.$toastr.s("OOOOH LA");

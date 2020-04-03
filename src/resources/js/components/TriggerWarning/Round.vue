@@ -161,7 +161,7 @@
 
 <script>
 
-    import PlayerProfile from "./PlayerProfile";
+    import PlayerProfile from "../PlayerProfile";
     import Card from "./Card";
     import draggable from 'vuedraggable';
     import shuffle from 'lodash/shuffle'
@@ -242,7 +242,7 @@
             fetch() {
                 let self = this;
 
-                axios.get('api/rounds/' + this.round_id)
+                axios.get('/api/games/trigger_warning/rounds/' + this.round_id)
                     .then(response => {
                         self.me = response.data.me;
 
@@ -289,7 +289,7 @@
                             return;
                         }
 
-                        axios.put('api/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
+                        axios.put('/api/games/trigger_warning/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
                             {
                                 'from_pos': evt.oldIndex,
                                 'to_pos': evt.newIndex
@@ -312,7 +312,7 @@
 
                     if (evt.to.id === 'picked_card_list') {
 
-                        axios.put('api/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
+                        axios.put('/api/games/trigger_warning/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
                             {
                                 'to_pos': evt.newIndex
                             }
@@ -377,7 +377,7 @@
             electWinner(player) {
                 let self = this;
 
-                axios.post('api/rounds/' + this.round_id + '/close/' + player.id)
+                axios.post('/api/games/trigger_warning/rounds/' + this.round_id + '/close/' + player.id)
                     .then(response => {
                         self.$toastr.s("Ok");
                         self.$emit('end');
