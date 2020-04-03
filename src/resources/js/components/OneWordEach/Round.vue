@@ -27,7 +27,8 @@
 
         </div>
 
-        <div class="col-sm-12" align="center">
+        <div class="col-sm-12" align="center" v-if="me.id !== round.guessing_user.id">
+
             <h1>{{round.word.word}}</h1>
 
             <button class="btn btn-success" @click="closeRound">
