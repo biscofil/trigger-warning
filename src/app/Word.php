@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @package App
  * @property mixed id
  * @property string word
+ * @property string forbidden_words
  * @property int usage_count
  */
 class Word extends Model
@@ -18,7 +19,9 @@ class Word extends Model
     protected $fillable = [
         'id',
         'word',
-        'usage_count'
+        'forbidden_words',
+        'usage_count',
+        'creator_user_id'
     ];
 
     /**

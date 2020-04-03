@@ -19,6 +19,14 @@
 
                     </div>
 
+                    <div class="form-group">
+
+                        <label for="forbidden_words">Parole vietate</label>
+                        <textarea class="form-control" id="forbidden_words" v-model="newWord.forbidden_words">
+                        </textarea>
+
+                    </div>
+
                     <button class="btn btn-danger" @click="close">Chiudi</button>
                     <button class="btn btn-success" @click="save">Salva</button>
 
@@ -39,7 +47,8 @@
         data() {
             return {
                 newWord: {
-                    word: ''
+                    word: '',
+                    forbidden_words: ''
                 }
             }
         },
@@ -50,6 +59,7 @@
                 axios.post('/api/games/one_word_each/words', this.newWord)
                     .then(response => {
                         self.newWord.word = "";
+                        self.newWord.forbidden_words = "";
                         self.$toastr.s("OOOOH LA");
                     })
                     .catch(e => {

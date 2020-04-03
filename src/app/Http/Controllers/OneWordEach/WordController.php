@@ -30,12 +30,14 @@ class WordController extends Controller
 
         $validatedData = $request->validate([
             'word' => ['required', 'max:255'],
+            'forbidden_words' => ['required', 'max:255'],
         ]);
 
         try {
 
             Word::create([
                 'word' => strtolower($validatedData['word']),
+                'forbidden_words' => strtolower($validatedData['forbidden_words']),
                 'creator_user_id' => $me->id
             ]);
 
