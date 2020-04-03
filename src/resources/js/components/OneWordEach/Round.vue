@@ -31,6 +31,8 @@
 
             <h1>{{round.word.word}}</h1>
 
+            <p>Parole vietate: {{round.word.forbidden_words}}</p>
+
             <button class="btn btn-success" @click="closeRound">
                 Fine round
             </button>
