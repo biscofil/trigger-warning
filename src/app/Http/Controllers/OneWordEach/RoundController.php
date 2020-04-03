@@ -82,9 +82,13 @@ class RoundController extends Controller
     public function close_round(Request $request, WordRound $round)
     {
 
+        $validatedData = $request->validate([
+            'success' => ['required', 'boolean'],
+        ]);
+
         try {
 
-            $round->close();
+            $round->close(boolval($validatedData['success']));
 
         } catch (GameException $e) {
 

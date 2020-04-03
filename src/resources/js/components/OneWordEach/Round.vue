@@ -33,8 +33,12 @@
 
             <p>Parole vietate: {{round.word.forbidden_words}}</p>
 
-            <button class="btn btn-success" @click="closeRound">
-                Fine round
+            <button class="btn btn-success" @click="closeRound(true)">
+                Ce l'han fatta
+            </button>
+
+            <button class="btn btn-danger" @click="closeRound(false)">
+                Mannaggia
             </button>
 
         </div>
@@ -95,10 +99,12 @@
                     });
             },
 
-            closeRound() {
+            closeRound(success) {
                 let self = this;
 
-                axios.post('/api/games/one_word_each/rounds/' + this.round_id + '/close')
+                axios.post('/api/games/one_word_each/rounds/' + this.round_id + '/close', {
+                    success: success ? 1 : 0
+                })
                     .then(response => {
                         self.$toastr.s("Ok");
                         self.$emit('end');

@@ -249,24 +249,27 @@ class WordRound extends Model
     }
 
     /**
+     * @param bool $success
      * @return void
      * @throws GameException
      */
-    public function close(): void
+    public function close(bool $success): void
     {
 
         if (!$this->opened) {
             throw new GameException('Round non aperto');
         }
 
-        // TODO
+        $guessingInc = $success ? 2 : -2;
+        $suggestingInc = $success ? 1 : -1;
 
-        /*$winner->cardsInHand()->picked()->update([
-            'usage_count' => DB::raw('`usage_count` + 1 ')
-        ]);
+        $this->guessingUser->score += $guessingInc;
+        $this->guessingUser->save();
 
-        $winner->score = $winner->score + 1;
-        $winner->save();*/
+        $this->firstSuggestingUser->score += $suggestingInc;
+        $this->firstSuggestingUser->save();
+        $this->secondSuggestingUser->score += $suggestingInc;
+        $this->secondSuggestingUser->save();
 
         $this->word->usage_count += 1;
         $this->word->save();
