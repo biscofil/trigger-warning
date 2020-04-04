@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Exceptions\GameException;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Log;
  * @property bool opened
  *
  * @property null|Collection players
+ * @property Carbon created_at
  * @method static self|Builder open()
  */
 class WordRound extends Model
@@ -41,6 +43,19 @@ class WordRound extends Model
     protected $casts = [
         'opened' => 'bool'
     ];
+
+    protected $appends = [
+        'end_time'
+    ];
+
+    /**
+     * @return Carbon
+     */
+    public function getEndTimeAttribute(): Carbon
+    {
+        $seconds = config('game.one_word_each.seconds');
+        return $this->created_at->addSeconds($seconds);
+    }
 
     /**
      * @return Round|null
@@ -260,8 +275,40 @@ class WordRound extends Model
             throw new GameException('Round non aperto');
         }
 
-        $guessingInc = $success ? 2 : -2;
-        $suggestingInc = $success ? 1 : -1;
+        $secondLeft = $this->getEndTimeAttribute()
+            ->diffInSeconds(Carbon::now(), false);
+
+        if ($secondLeft < 0) {
+            // too late
+
+            $guessingInc = -2;
+            $suggestingInc = -1;
+
+        } else {
+            // in time
+
+            if ($success) {
+
+                // guessed
+
+                $ratio = $secondLeft / config('game.one_word_each.seconds');
+
+                // 1 : best, guessed right away
+                // 0 : worst
+
+                $guessingInc = intval($ratio * 6);
+                $suggestingInc = intval($ratio * 3);
+
+            } else {
+
+                // wrong
+
+                $guessingInc = -2;
+                $suggestingInc = -1;
+
+            }
+
+        }
 
         $this->guessingUser->score += $guessingInc;
         $this->guessingUser->save();

@@ -2,11 +2,11 @@
 
     <div class="row">
 
-        <div class="col-sm-12" v-if="round_id">
+        <div class="col-sm-12" align="center" v-if="round_id">
             <Round :round_id="round_id"></Round>
         </div>
 
-        <div class="col-sm-12" v-else>
+        <div class="col-sm-12" align="center" v-else>
 
             <button class="btn btn-lg btn-success" @click="newRound">
                 Nuovo round
@@ -14,7 +14,7 @@
 
         </div>
 
-        <div class="col-sm-12">
+        <div class="col-sm-12" align="center">
 
             <p>
                 Parole: {{word_count}}
@@ -48,7 +48,7 @@
                 me: null,
                 round_id: null,
                 users: null,
-                word_count : null
+                word_count: null
             }
         },
 

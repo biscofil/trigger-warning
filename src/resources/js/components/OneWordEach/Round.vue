@@ -27,6 +27,12 @@
 
         </div>
 
+        <div class="col-sm-12" align="center">
+
+            <Countdown :deadline="round.end_time"></Countdown>
+
+        </div>
+
         <div class="col-sm-12" align="center" v-if="me.id !== round.guessing_user.id">
 
             <h1>{{round.word.word}}</h1>
@@ -48,14 +54,19 @@
 </template>
 
 <script>
+
+    var moment = require('moment');
+
     import PlayerProfile from "../PlayerProfile";
+    import Countdown from "./Countdown";
 
     export default {
 
         name: "Round",
 
         components: {
-            PlayerProfile
+            PlayerProfile,
+            Countdown
         },
 
         props: {
@@ -90,6 +101,8 @@
 
                         self.me = response.data.me;
                         self.round = response.data.round;
+
+                        self.round.end_time = moment(self.round.end_time);
 
                     })
                     .catch(e => {
