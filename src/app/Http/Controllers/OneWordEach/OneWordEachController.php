@@ -5,8 +5,8 @@ namespace App\Http\Controllers\OneWordEach;
 
 
 use App\Http\Controllers\Controller;
-use App\Round;
 use App\User;
+use App\Word;
 use App\WordRound;
 
 /**
@@ -39,6 +39,7 @@ class OneWordEachController extends Controller
             'me' => $me,
             'round_id' => $round ? $round->id : null,
             'users' => User::approved()->where('id', '<>', $me->id)->get(),
+            'words' => Word::count(),
         ];
 
     }

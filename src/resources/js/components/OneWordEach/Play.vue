@@ -15,9 +15,15 @@
         </div>
 
         <div class="col-sm-12">
+
+            <p>
+                Parole: {{word_count}}
+            </p>
+
             <button class="btn btn-lg btn-info" @click="newWord">
                 Nuova parola
             </button>
+
         </div>
 
         <modals-container/>
@@ -42,6 +48,7 @@
                 me: null,
                 round_id: null,
                 users: null,
+                word_count : null
             }
         },
 
@@ -59,6 +66,7 @@
                     self.me = response.data.me;
                     self.round_id = response.data.round_id;
                     self.users = response.data.users;
+                    self.word_count = response.data.words;
 
                 })
                 .catch(e => {
