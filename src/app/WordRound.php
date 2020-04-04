@@ -275,8 +275,8 @@ class WordRound extends Model
             throw new GameException('Round non aperto');
         }
 
-        $secondLeft = $this->getEndTimeAttribute()
-            ->diffInSeconds(Carbon::now(), false);
+        $secondLeft = Carbon::now()
+            ->diffInSeconds($this->getEndTimeAttribute(), false);
 
         if ($secondLeft < 0) {
             // too late
@@ -288,7 +288,6 @@ class WordRound extends Model
             // in time
 
             if ($success) {
-
                 // guessed
 
                 $ratio = $secondLeft / config('game.one_word_each.seconds');
@@ -300,7 +299,6 @@ class WordRound extends Model
                 $suggestingInc = intval($ratio * 3);
 
             } else {
-
                 // wrong
 
                 $guessingInc = -2;
