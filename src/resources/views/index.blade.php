@@ -18,11 +18,11 @@
 
         </div>
 
-        <div id="app">
-            <Home></Home>
-        </div>
-
         @auth
+
+            <div id="app">
+                <Home></Home>
+            </div>
 
             <a class="btn btn-success" href="{{ route('play.trigger_warning') }}">Gioca a Trigger Warning</a>
 
