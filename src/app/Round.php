@@ -67,6 +67,7 @@ class Round extends Model
     }
 
     /**
+     *
      */
     public function players(): Collection
     {
@@ -150,7 +151,7 @@ class Round extends Model
      */
     private static function checkNumberOfPlayers(): void
     {
-        $minUsersForRound = config('game.min_users_for_round');
+        $minUsersForRound = config('game.trigger_warning.min_users_for_round');
         if (User::approved()->active()->count() < $minUsersForRound) {
             throw new GameException('Servono almeno ' . $minUsersForRound . ' stronzi');
         }

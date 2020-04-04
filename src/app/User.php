@@ -136,7 +136,7 @@ class User extends Authenticatable
     {
         $cardsInHand = $this->cardsInHand()->count();
 
-        $cardsPerUser = config('game.cards_per_user');
+        $cardsPerUser = config('game.trigger_warning.cards_per_user');
 
         Log::debug("User " . $this->id .
             " has " . $cardsInHand . "/" . $cardsPerUser . " cards in hand");

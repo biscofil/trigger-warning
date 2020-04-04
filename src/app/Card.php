@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static self|Builder filling()
  * @method static self|Builder smartRandom()
  * @method static self|Builder picked(bool $true)
+ * @method static self create(array $array)
  */
 class Card extends Model
 {
@@ -75,10 +76,10 @@ class Card extends Model
     public function scopeSmartRandom(Builder $query): Builder
     {
 
-        $usageCountMultiplier = config('game.card_random.usage_count_multiplier');
-        $winCountMultiplier = config('game.card_random.win_count_multiplier');
-        $randomMultiplier = config('game.card_random.random_multiplier');
-        $daysMultiplier = config('game.card_random.days_multiplier');
+        $usageCountMultiplier = config('game.trigger_warning.card_random.usage_count_multiplier');
+        $winCountMultiplier = config('game.trigger_warning.card_random.win_count_multiplier');
+        $randomMultiplier = config('game.trigger_warning.card_random.random_multiplier');
+        $daysMultiplier = config('game.trigger_warning.card_random.days_multiplier');
 
         // TODO normalize every parameter to 0/1
 
