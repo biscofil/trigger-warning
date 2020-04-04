@@ -4,7 +4,6 @@
 namespace App\Http\Controllers;
 
 use App\User;
-use Illuminate\Http\JsonResponse;
 
 /**
  * Class HomeController
@@ -31,32 +30,17 @@ class HomeController extends Controller
 
         return [
             'me' => $me,
-            'users' => User::approved()->where('id', '<>', $me->id)->get()
+            'users' => User::approved()->active()->where('id', '<>', $me->id)->get()
         ];
 
     }
 
     /**
-     * @param User $user
-     * @param bool $active
-     * @return array|JsonResponse
+     *
      */
-    public function setUserActive(User $user, bool $active)
+    public function heartBeat()
     {
-
-        $me = $this->getAuthUser();
-
-        if ($me->id === $user->id) {
-            return response()->json(['error' => 'Non puoi modificare il tuo stato!'], 400);
-        }
-
-        $user->active = $active;
-        $user->save();
-
-        return [
-            'users' => User::approved()->where('id', '<>', $me->id)->get()
-        ];
-
+        // do nothing, LastUserActivity handles online status
     }
 
 }

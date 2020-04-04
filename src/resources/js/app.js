@@ -44,7 +44,33 @@ Vue.component('one-word-each', require('./components/OneWordEach/Play.vue').defa
 const app = new Vue({
     el: '#app',
 
-    data: {},
+    mounted() {
 
-    methods: {}
+        let self = this;
+        self.sendHeartBeat();
+
+        this.$nextTick(function () {
+
+            window.setInterval(() => {
+
+                self.sendHeartBeat();
+
+            }, 10000);
+
+        })
+    },
+
+    methods: {
+
+        sendHeartBeat() {
+            axios.get('/api/heartbeat')
+                .then(response => {
+
+                })
+                .catch(e => {
+
+                })
+        }
+
+    }
 });

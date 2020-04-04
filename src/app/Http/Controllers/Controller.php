@@ -23,10 +23,6 @@ class Controller extends BaseController
     {
         /** @var User $user */
         $me = auth()->user();
-
-        $me->active = true;
-        $me->save();
-
         return $me;
     }
 }

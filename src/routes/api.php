@@ -14,7 +14,7 @@
 Route::middleware('auth')->group(function () {
 
     Route::get('/users', 'HomeController@xhr_play');
-    Route::post('/users/{user}/active/{active}', 'HomeController@setUserActive');
+    Route::get('/heartbeat', 'HomeController@heartBeat');
 
     Route::prefix('games')->group(function () {
 

@@ -11,14 +11,11 @@
         </div>
 
         <div class="col-sm-12">
-            Utenti con cui giocare:
+            Utenti online:
         </div>
 
-        <div class="col-sm-12" v-for="user in users">
-
-            <input type="checkbox" :checked="user.active" :id="user.id" @change="setUserActive(user)"/>
-            <label :for="user.id">{{user.name}}</label>
-
+        <div class="col-sm-2" v-for="user in users">
+            <PlayerProfile :player="user"></PlayerProfile>
         </div>
 
     </div>
@@ -56,32 +53,8 @@
                     self.$toastr.e("Ops...");
                 });
 
-        },
-
-        methods: {
-
-            setUserActive(user) {
-
-                let self = this;
-
-                let newActive = user.active ? 0 : 1;
-
-                axios.post('/api/users/' + user.id + '/active/' + newActive)
-                    .then(response => {
-
-                        self.users = response.data.users;
-                        self.$toastr.s("Ok!");
-
-                    })
-                    .catch(e => {
-
-                        self.$toastr.e(e.response.data.error, "Cazzo...");
-
-                    });
-
-            }
-
         }
+
     }
 </script>
 
