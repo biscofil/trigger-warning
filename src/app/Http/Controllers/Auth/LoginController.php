@@ -88,7 +88,7 @@ class LoginController extends Controller
                     // log them in
                     auth()->login($existingUser);
 
-                    return redirect()->route('play');
+                    return redirect()->route('homepage');
 
                 } else {
 
