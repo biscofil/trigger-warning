@@ -88,6 +88,8 @@ class LoginController extends Controller
                     // log them in
                     auth()->login($existingUser);
 
+                    User::updateCacheUserList(true);
+
                     return redirect()->route('homepage');
 
                 } else {
