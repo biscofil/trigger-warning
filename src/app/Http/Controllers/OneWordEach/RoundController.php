@@ -8,6 +8,7 @@ use App\User;
 use App\WordRound;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class RoundController
@@ -33,6 +34,13 @@ class RoundController extends Controller
         } catch (GameException $e) {
 
             return response()->json(['error' => $e->getMessage()], 400);
+
+        } catch (\Exception $e) {
+
+            Log::error($e->getMessage());
+            Log::debug($e->getTraceAsString());
+
+            return response()->json(['error' => 'server error'], 500);
 
         }
 
@@ -93,6 +101,13 @@ class RoundController extends Controller
         } catch (GameException $e) {
 
             return response()->json(['error' => $e->getMessage()], 400);
+
+        } catch (\Exception $e) {
+
+            Log::error($e->getMessage());
+            Log::debug($e->getTraceAsString());
+
+            return response()->json(['error' => 'server error'], 500);
 
         }
 
