@@ -248,4 +248,15 @@ class User extends Authenticatable
 
     }
 
+    /**
+     * @param int $diff
+     */
+    public function incrementScore(int $diff): void
+    {
+        $this->score += $diff;
+        if ($this->score < 0) {
+            $this->score = 0;
+        }
+    }
+
 }

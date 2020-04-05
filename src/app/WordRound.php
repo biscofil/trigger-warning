@@ -308,12 +308,13 @@ class WordRound extends Model
 
         }
 
-        $this->guessingUser->score += $guessingInc;
+        $this->guessingUser->incrementScore($guessingInc);
         $this->guessingUser->save();
 
-        $this->firstSuggestingUser->score += $suggestingInc;
+        $this->firstSuggestingUser->incrementScore($suggestingInc);
         $this->firstSuggestingUser->save();
-        $this->secondSuggestingUser->score += $suggestingInc;
+
+        $this->secondSuggestingUser->incrementScore($suggestingInc);
         $this->secondSuggestingUser->save();
 
         $this->word->usage_count += 1;
