@@ -258,7 +258,7 @@ class Round extends Model
     private static function clearPlayersDeck(): void
     {
 
-        if (config('game.reset_cards_every_round')) {
+        if (config('game.trigger_warning.reset_cards_every_round')) {
 
             Log::debug("Clearing all the user decks");
 
