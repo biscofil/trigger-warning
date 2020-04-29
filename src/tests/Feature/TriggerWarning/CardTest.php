@@ -1,10 +1,14 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\TriggerWarning;
 
 use App\Card;
 use Tests\TestCase;
 
+/**
+ * Class CardTest
+ * @package Tests\Feature\TriggerWarning
+ */
 class CardTest extends TestCase
 {
 
@@ -27,7 +31,6 @@ class CardTest extends TestCase
         }
 
     }
-
 
 
 }
