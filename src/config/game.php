@@ -12,13 +12,17 @@ return [
 
         'card_random' => [
 
-            'usage_count_multiplier' => intval(env('GAME_CARDS_USAGE_COUNT_MULTIPLIER', 1)),
+            'usage_count_multiplier' => env('GAME_CARDS_USAGE_COUNT_MULTIPLIER'),
 
-            'win_count_multiplier' => intval(env('GAME_CARDS_WIN_COUNT_MULTIPLIER', -1)),
+            'usage_count_limit' => env('GAME_CARDS_USAGE_COUNT_LIMIT'),
 
-            'random_multiplier' => intval(env('GAME_CARDS_RANDOM_MULTIPLIER', 20)),
+            'win_count_multiplier' => env('GAME_CARDS_WIN_COUNT_MULTIPLIER'),
 
-            'days_multiplier' => intval(env('GAME_CARDS_DAYS_MULTIPLIER', 1))
+            'random_multiplier' => env('GAME_CARDS_RANDOM_MULTIPLIER'),
+
+            'days_multiplier' => env('GAME_CARDS_DAYS_MULTIPLIER'),
+
+            'wait_hours' => env('GAME_CARDS_WAIT_HOURS')
 
         ]
 
