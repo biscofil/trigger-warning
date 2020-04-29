@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static self|Builder inMainDeck()
  * @method static self|Builder filling()
  * @method static self|Builder smartRandom()
+ * @method static self|Builder notRecentlyCreated()
+ * @method static self|Builder notUsedTooManyTimes()
  * @method static self|Builder picked(bool $true)
  * @method static self create(array $array)
  */
@@ -55,18 +58,39 @@ class Card extends Model
     ];
 
     /**
-     * The "booting" method of the model.
-     *
-     * @return void
+     * @param Builder $query
+     * @return Builder
      */
-    protected static function boot()
+    public function scopeNotRecentlyCreated(Builder $query): Builder
     {
-        parent::boot();
 
-        /*static::addGlobalScope('approved', function (Builder $builder) {
-            $builder->where('approved', '=', true);
-        });*/
+        $waitHours = config('game.trigger_warning.card_random.wait_hours');
 
+        if (!is_null($waitHours)) {
+
+            $now = Carbon::now();
+            $date = $now->subHours(intval($waitHours));
+
+            $query->where('created_at', '<', $date->toDateTimeString());
+        }
+
+        return $query;
+    }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeNotUsedTooManyTimes(Builder $query): Builder
+    {
+
+        $usageLimit = config('game.trigger_warning.card_random.usage_count_limit');
+
+        if (!is_null($usageLimit)) {
+            $query->where('usage_count', '<', intval($usageLimit));
+        }
+
+        return $query;
     }
 
     /**
@@ -76,31 +100,55 @@ class Card extends Model
     public function scopeSmartRandom(Builder $query): Builder
     {
 
-        $usageCountMultiplier = config('game.trigger_warning.card_random.usage_count_multiplier');
-        $winCountMultiplier = config('game.trigger_warning.card_random.win_count_multiplier');
-        $randomMultiplier = config('game.trigger_warning.card_random.random_multiplier');
-        $daysMultiplier = config('game.trigger_warning.card_random.days_multiplier');
+        $orderByParts = [];
 
-        // TODO normalize every parameter to 0/1
+        // ########## USAGE COUNT
 
         // usage count is 1 if the card is the most used one
         // usage count is 0 if the card is the least used one
-        $usageCountNormalized = "usage_count / ( SELECT MAX(usage_count) + 1 FROM cards )";
+        $usageCountMultiplier = config('game.trigger_warning.card_random.usage_count_multiplier');
+        if (!is_null($usageCountMultiplier)) {
+            $usageCountMultiplier = floatval($usageCountMultiplier);
+            $usageCountNormalized = "usage_count / ( SELECT MAX(usage_count) + 1 FROM cards )";
+            $orderByParts[] = "( ($usageCountNormalized) * $usageCountMultiplier )";
+        }
+
+        // ########## WIN COUNT
 
         // win count is 1 if the card is the most winning one
         // win count is 0 if the card is the least winning one
-        $winCountNormalized = "win_count / ( SELECT MAX(win_count) + 1 FROM cards )";
+        $winCountMultiplier = config('game.trigger_warning.card_random.win_count_multiplier');
+        if (!is_null($winCountMultiplier)) {
+            $winCountMultiplier = floatval($winCountMultiplier);
+            $winCountNormalized = "win_count / ( SELECT MAX(win_count) + 1 FROM cards )";
+            $orderByParts[] = " ( ($winCountNormalized) * $winCountMultiplier )";
+        }
 
-        $daysSinceLastUpdate = "DATEDIFF( NOW() , updated_at )";
+        // ########## DAYS SINCE UPDATED_AT
 
-        $daysSinceLastUpdateNormalized = "$daysSinceLastUpdate / ( SELECT MAX($daysSinceLastUpdate) + 1  FROM cards)";
+        $daysMultiplier = config('game.trigger_warning.card_random.days_multiplier');
+        if (!is_null($daysMultiplier)) {
+            $daysMultiplier = floatval($daysMultiplier);
+            $daysSinceLastUpdate = "DATEDIFF( NOW() , updated_at )";
+            $daysSinceLastUpdateNormalized = "$daysSinceLastUpdate / ( SELECT MAX($daysSinceLastUpdate) + 1  FROM cards)";
+            $orderByParts[] = "( ($daysSinceLastUpdateNormalized)  * $daysMultiplier )";
+        }
 
-        return $query->orderByRaw("(
-                ( ($usageCountNormalized)           * $usageCountMultiplier )
-            +   ( ($winCountNormalized)             * $winCountMultiplier )
-            +   ( ($daysSinceLastUpdateNormalized)  * $daysMultiplier )
-            +   ( RAND()                            * $randomMultiplier )
-        ) ASC");
+        // ########## RANDOM
+
+        $randomMultiplier = config('game.trigger_warning.card_random.random_multiplier');
+        if (!is_null($randomMultiplier)) {
+            $randomMultiplier = floatval($randomMultiplier);
+            $orderByParts[] = "( RAND() * $randomMultiplier )";
+        }
+
+        // ####################### Build Query
+
+        if (count($orderByParts)) {
+            $query->orderByRaw(implode("+", $orderByParts) . " ASC");
+        }
+
+        return $query;
 
     }
 

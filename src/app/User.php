@@ -73,6 +73,8 @@ class User extends Authenticatable
      * ORDER BY ratio DESC
      */
 
+    // ################################################################ SCOPES
+
     /**
      * @param Builder $query
      * @return Builder
@@ -90,6 +92,18 @@ class User extends Authenticatable
     {
         return $query->whereIn('id', self::getCacheOnlineUserList());
     }
+
+    // ################################################################ RELATIONS
+
+    /**
+     * @return HasMany|Card
+     */
+    public function cardsInHand(): HasMany
+    {
+        return $this->hasMany(Card::class);
+    }
+
+    // ################################################################
 
     /**
      *
@@ -132,14 +146,6 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany
-     */
-    public function cardsInHand(): HasMany
-    {
-        return $this->hasMany(Card::class);
-    }
-
-    /**
      * @return int
      */
     public function cardsNeeded(): int
@@ -177,16 +183,17 @@ class User extends Authenticatable
     }
 
     /**
+     * @param bool $forceUpdateCacheUserList
      * @return void
      */
-    public function setOnline(): void
+    public function setOnline(bool $forceUpdateCacheUserList = false): void
     {
         Cache::put(
             self::getOnlineCacheKey($this->id),
             true,
             20        // keep it for 20 seconds
         );
-        self::updateCacheUserList();
+        self::updateCacheUserList($forceUpdateCacheUserList);
     }
 
     /**

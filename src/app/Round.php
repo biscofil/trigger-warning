@@ -38,16 +38,8 @@ class Round extends Model
         'opened' => 'bool'
     ];
 
-    /**
-     * @return Round|null
-     */
-    static function getOpenRound(): ?Round
-    {
-        return self::open()
-            ->orderBy('id', 'desc')
-            ->limit(1)
-            ->first();
-    }
+
+    // ############################ SCOPES #################################
 
     /**
      * @param Builder $query
@@ -58,23 +50,14 @@ class Round extends Model
         return $query->where('opened', '=', true);
     }
 
+    // ############################ RELATIONS #################################
+
     /**
      * @return BelongsTo
      */
     public function host(): BelongsTo
     {
         return $this->belongsTo(User::class, 'host_user_id');
-    }
-
-    /**
-     *
-     */
-    public function players(): Collection
-    {
-        return User::approved()
-            ->active()
-            ->where('id', '<>', $this->host_user_id)
-            ->get();
     }
 
     /**
@@ -93,7 +76,29 @@ class Round extends Model
         return $this->hasMany(Card::class);
     }
 
+    /**
+     *
+     */
+    public function players(): Collection
+    {
+        return User::approved()
+            ->active()
+            ->where('id', '<>', $this->host_user_id)
+            ->get();
+    }
+
     // ############################ NEW ROUND #################################
+
+    /**
+     * @return Round|null
+     */
+    static function getOpenRound(): ?Round
+    {
+        return self::open()
+            ->orderBy('id', 'desc')
+            ->limit(1)
+            ->first();
+    }
 
     /**
      * @return Round
@@ -152,8 +157,9 @@ class Round extends Model
     private static function checkNumberOfPlayers(): void
     {
         $minUsersForRound = config('game.trigger_warning.min_users_for_round');
-        if (User::approved()->active()->count() < $minUsersForRound) {
-            throw new GameException('Servono almeno ' . $minUsersForRound . ' stronzi');
+        $actualOnlineCount = User::approved()->active()->count();
+        if ($actualOnlineCount < $minUsersForRound) {
+            throw new GameException('Servono almeno ' . $minUsersForRound . ' stronzi ma ce sono solo ' . $actualOnlineCount);
         }
 
     }
@@ -282,12 +288,10 @@ class Round extends Model
 
         $requiredCardCount = $this->getRequiredCards($players);
 
-        $now = Carbon::now();
-        $date = $now->subHours(1);
-
         $cards = Card::filling()
             ->inMainDeck()
-            ->where('created_at', '<', $date->toDateTimeString());
+            ->notRecentlyCreated()
+            ->notUsedTooManyTimes();
 
         // give priority to older or not used
 
@@ -385,7 +389,6 @@ class Round extends Model
         $this->save();
 
     }
-
 
     // #############################################################
 
