@@ -6,7 +6,11 @@
 
         <trigger-warning></trigger-warning>
 
-        <a href="{{ \App\TriggerWarningTelegramBot::get_login_url(getAuthUser()) }}">Accedi con Telegram</a>
+        @if(is_null(getAuthUser()->telegram_auth_code))
+            <a class="btn btn-outline-warning" href="{{ \App\TriggerWarningTelegramBot::get_login_url(getAuthUser()) }}">
+                Accedi con Telegram
+            </a>
+        @endif
 
     </div>
 
