@@ -45,13 +45,8 @@ class RoundTest extends TestCase
         $this->assertTrue(in_array($userA->id, $active));
         $this->assertTrue(in_array($userB->id, $active));
 
-        /** @var Card $filling */
-        $filling = factory(Card::class)->create();
-
-        /** @var Card $toFill */
-        $toFill = factory(Card::class)->create();
-        $toFill->type = Card::$TypeCartToFill;
-        $toFill->save();
+        factory(Card::class)->create();
+        factory(Card::class)->create();
 
         /** @var Card $toFill */
         $toFill = factory(Card::class)->create();
