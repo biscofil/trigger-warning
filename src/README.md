@@ -20,3 +20,9 @@
 
 </VirtualHost>
 ```
+
+Docker configuration change (Dockerfile)
+```
+docker build -t registry.gitlab.com/biscofil/trigger_warning .
+docker push registry.gitlab.com/biscofil/trigger_warning
+```
