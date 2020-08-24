@@ -1,4 +1,4 @@
-image: registry.gitlab.com/wecould/app_72h_web
+image: registry.gitlab.com/biscofil/trigger_warning
 
 services:
   - mysql:5.7
