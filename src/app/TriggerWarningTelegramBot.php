@@ -184,23 +184,29 @@ class TriggerWarningTelegramBot
         $messageID = null;
         $userID = null;
         $chatID = null;
-        $message = null;
+        $messageText = null;
+
+        if (!array_key_exists('message', $request)) {
+            return;
+        }
+
+        //Log::debug($request);
 
         try {
             $messageID = $request['message']['message_id'];
             $userID = $request['message']['from']['id'];
             $chatID = $request['message']['chat']['id'];
-            $message = $request['message']['text'];
+            $messageText = $request['message']['text'];
         } catch (\Exception $e) {
             Log::error($e->getMessage());
         }
 
-        Log::debug("telegram_webhook from " . $userID);
-        Log::debug($message);
+        /*Log::debug("telegram_webhook from " . $userID);
+        Log::debug($messageText);*/
 
-        if (str_starts_with($message, '/')) {
+        if (str_starts_with($messageText, '/')) {
 
-            $parts = explode(' ', $message, 2); // max 2
+            $parts = explode(' ', $messageText, 2); // max 2
 
             switch ($parts[0]) {
 
@@ -222,8 +228,20 @@ class TriggerWarningTelegramBot
 
                     if (count($parts) == 2) {
 
+                        $user = $this->getServerUser($userID);
+
+                        if (is_null($user)) {
+
+                            Log::debug("no user with id " . $userID);
+                            $this->sendMessage($chatID, $messageID, "Chi cazzo sei???");
+                            break;
+                        }
+
+                        $name = $user->name;
+
                         $card = $parts[1];
-                        $this->sendMessage($chatID, $messageID, "Nuova carta: " . $card);
+
+                        $this->sendMessage($chatID, $messageID, "Nuova carta di $name: " . $card);
                         break;
 
                     }
@@ -246,6 +264,15 @@ class TriggerWarningTelegramBot
 
         }
 
+    }
+
+    /**
+     * @param int $userID
+     * @return User|null
+     */
+    private function getServerUser(int $userID): ?User
+    {
+        return User::query()->where('telegram_id', '=', $userID)->get()->first();
     }
 
 }
