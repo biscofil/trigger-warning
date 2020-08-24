@@ -4,13 +4,13 @@ namespace App\Http\Controllers\TriggerWarning;
 
 use App\Card;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\NewCardRequest;
 use App\Round;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 /**
  * Class CardController
@@ -89,37 +89,17 @@ class CardController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param NewCardRequest $request
      * @return array|JsonResponse|Response
+     * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request)
+    public function store(NewCardRequest $request)
     {
 
         /** @var User $user */
         $me = auth()->user();
 
-        $validatedData = $request->validate([
-            'content' => ['required', 'max:255'],
-            'type' => ['required', 'numeric', Rule::in([Card::$TypeCartToFill, Card::$TypeFillingCart])],
-        ]);
-
-        $type = intval($validatedData['type']);
-
-        if ($type == Card::$TypeCartToFill) {
-
-            $count = substr_count($validatedData['content'], '@');
-
-            if ($count === 0 || $count > 2) {
-                return response()->json(['error' => 'Puoi mettere uno o due spazi da riempire!'], 400);
-            }
-
-        }
-
-        Card::create([
-            'content' => $validatedData['content'],
-            'type' => $type,
-            'creator_user_id' => $me->id
-        ]);
+        $request->store($me);
 
         return [];
 

@@ -3,7 +3,9 @@
 
 namespace App;
 
+use App\Http\Requests\NewCardRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Telegram\Bot\Api;
 
@@ -242,9 +244,27 @@ class TriggerWarningTelegramBot
 
                         $name = $user->name;
 
-                        $card = $parts[1];
+                        $cardContent = $parts[1];
 
-                        $this->sendMessage($chatID, $messageID, "Nuova carta di $name: " . $card);
+                        $requestData = [
+                            'content' => $cardContent,
+                            'type' => Card::$TypeFillingCart
+                        ];
+
+                        $newCardRequest = new NewCardRequest();
+
+                        $validator = Validator::make($requestData, $newCardRequest->rules());
+
+                        $newCardRequest->setValidator($validator);
+                        $newCardRequest->request->replace($requestData);
+                        try {
+                            $newCardRequest->store($user);
+                        } catch (\Exception $e) {
+                            $this->sendMessage($chatID, $messageID, "Errore nella creazione della carta");
+                            break;
+                        }
+
+                        $this->sendMessage($chatID, $messageID, "Nuova carta salvata: " . $cardContent);
                         break;
 
                     }
