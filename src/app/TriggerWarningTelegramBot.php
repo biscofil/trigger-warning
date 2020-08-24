@@ -36,7 +36,7 @@ class TriggerWarningTelegramBot
 
         $url = route('telegram_webhook');
         if (config('app.env') == 'local') {
-            $url = 'https://8e322ff6d383.ngrok.io/' . 'telegram/webhook';
+            $url = 'https://731f0382b8be.ngrok.io/' . 'telegram/webhook';
         }
 
         Log::debug("Setting telegram webhook to $url");
@@ -126,7 +126,8 @@ class TriggerWarningTelegramBot
         $this->telegram->sendMessage([
             'chat_id' => $chatID,
             'text' => $msg,
-            'reply_to_message_id' => $messageID
+            'reply_to_message_id' => $messageID,
+            'parse_mode' => 'markdown'
         ]);
     }
 
@@ -228,8 +229,9 @@ class TriggerWarningTelegramBot
                         }
 
                     }
+                    break;
 
-                case '/newcard':
+                case '/riempitiva':
 
                     if (count($parts) == 2) {
 
@@ -241,8 +243,6 @@ class TriggerWarningTelegramBot
                             $this->sendMessage($chatID, $messageID, "Chi cazzo sei???");
                             break;
                         }
-
-                        $name = $user->name;
 
                         $cardContent = $parts[1];
 
@@ -260,14 +260,60 @@ class TriggerWarningTelegramBot
                         try {
                             $newCardRequest->store($user);
                         } catch (\Exception $e) {
-                            $this->sendMessage($chatID, $messageID, "Errore nella creazione della carta");
+                            $this->sendMessage($chatID, $messageID, "Errore nella creazione della carta: " . $e->getMessage());
                             break;
                         }
 
-                        $this->sendMessage($chatID, $messageID, "Nuova carta salvata: " . $cardContent);
+                        $this->sendMessage($chatID, $messageID, "Nuova carta riempitiva: " . $cardContent);
                         break;
 
                     }
+
+
+                case '/riempibile':
+
+                    if (count($parts) == 2) {
+
+                        $user = $this->getServerUser($userID);
+
+                        if (is_null($user)) {
+
+                            Log::debug("no user with id " . $userID);
+                            $this->sendMessage($chatID, $messageID, "Chi cazzo sei???");
+                            break;
+                        }
+
+                        $cardContent = $parts[1];
+
+                        $requestData = [
+                            'content' => $cardContent,
+                            'type' => Card::$TypeCartToFill
+                        ];
+
+                        $newCardRequest = new NewCardRequest();
+
+                        $validator = Validator::make($requestData, $newCardRequest->rules());
+
+                        $newCardRequest->setValidator($validator);
+                        $newCardRequest->request->replace($requestData);
+                        try {
+                            $newCardRequest->store($user);
+                        } catch (\Exception $e) {
+                            $this->sendMessage($chatID, $messageID, "Errore nella creazione della carta: " . $e->getMessage());
+                            break;
+                        }
+
+                        $this->sendMessage($chatID, $messageID, "Nuova carta da riempire: " . $cardContent);
+                        break;
+
+                    }
+
+                case '/help':
+                    $this->sendMessage($chatID, $messageID, "Usa " . PHP_EOL .
+                        "`/riempitiva TESTO DELLA CARTA` o " . PHP_EOL .
+                        "`/riempibile TESTO DELLA @`" . PHP_EOL .
+                        " per aggiungere carte");
+                    break;
 
 
                 default:
@@ -279,6 +325,7 @@ class TriggerWarningTelegramBot
                     ];
 
                     $this->sendMessage($chatID, $messageID, $msgs[array_rand($msgs)]);
+
             }
 
         } else {
