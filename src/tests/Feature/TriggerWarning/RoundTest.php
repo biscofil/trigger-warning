@@ -40,7 +40,9 @@ class RoundTest extends TestCase
         $this->assertTrue(in_array($userA->id, User::getCacheOnlineUserList()));
         $this->assertTrue(in_array($userB->id, User::getCacheOnlineUserList()));
 
-        $this->assertCount(2, User::approved()->active()->get());
+        $active = User::approved()->active()->get()->pluck('id')->toArray();
+        $this->assertTrue(in_array($userA->id, $active));
+        $this->assertTrue(in_array($userB->id, $active));
 
         Round::newRound();
 
