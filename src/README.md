@@ -6,6 +6,8 @@ Trigger Warning
 [![coverage report](https://gitlab.com/biscofil/trigger_warning/badges/master/coverage.svg)](https://gitlab.com/biscofil/trigger_warning/-/commits/master)
 
 
+Apache configuration
+--------------------
 ```
 <VirtualHost *:80>
 
@@ -30,6 +32,7 @@ Trigger Warning
 ```
 
 Docker configuration change (Dockerfile)
+----------------------------------------
 ```
 docker build -t registry.gitlab.com/biscofil/trigger_warning .
 docker push registry.gitlab.com/biscofil/trigger_warning
