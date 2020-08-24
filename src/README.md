@@ -1,3 +1,11 @@
+Trigger Warning
+===============
+
+[![pipeline status](https://gitlab.com/biscofil/trigger_warning/badges/master/pipeline.svg)](https://gitlab.com/biscofil/trigger_warning/-/commits/master)
+
+[![coverage report](https://gitlab.com/biscofil/trigger_warning/badges/master/coverage.svg)](https://gitlab.com/biscofil/trigger_warning/-/commits/master)
+
+
 ```
 <VirtualHost *:80>
 
