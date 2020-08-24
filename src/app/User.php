@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Log;
  * @property mixed avatar
  * @property mixed avatar_original
  *
+ * @property null|string telegram_id
+ * @property null|string telegram_auth_code
+ *
  * @package App
  * @method static Builder|self approved()
  * @method static Builder|self active()
@@ -44,7 +47,8 @@ class User extends Authenticatable
         'name', 'email', 'approved',
         'score',
         'provider', 'provider_id',
-        'avatar', 'avatar_original'
+        'avatar', 'avatar_original',
+        'telegram_id', 'telegram_auth_code'
     ];
 
     protected $casts = [

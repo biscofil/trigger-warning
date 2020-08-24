@@ -20,6 +20,8 @@ Route::middleware('guest')->group(function () {
 
 });
 
+Route::post('telegram/webhook','TriggerWarning\TriggerWarningController@telegram_webhook')->name('telegram_webhook');
+
 Route::middleware('auth')->group(function () {
 
     Route::get('/logout', 'Auth\LoginController@logout')->name('logout');

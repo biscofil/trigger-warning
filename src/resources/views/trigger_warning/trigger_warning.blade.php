@@ -6,6 +6,8 @@
 
         <trigger-warning></trigger-warning>
 
+        <a href="{{ \App\TriggerWarningTelegramBot::get_login_url(getAuthUser()) }}">Accedi con Telegram</a>
+
     </div>
 
 @endsection

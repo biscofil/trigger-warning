@@ -6,8 +6,8 @@ namespace App\Http\Controllers\TriggerWarning;
 use App\Card;
 use App\Http\Controllers\Controller;
 use App\Round;
+use App\TriggerWarningTelegramBot;
 use App\User;
-use Illuminate\Http\JsonResponse;
 
 /**
  * Class TriggerWarningController
@@ -47,6 +47,17 @@ class TriggerWarningController extends Controller
 
     }
 
+    /**
+     * @return array
+     */
+    public function telegram_webhook()
+    {
+
+        $k = new TriggerWarningTelegramBot();
+        $k->parse_webhook(request()->toArray());
+        return [];
+
+    }
 
 }
 
