@@ -3,6 +3,7 @@
 namespace Tests\Feature\TriggerWarning;
 
 
+use App\Card;
 use App\Round;
 use App\User;
 use Illuminate\Support\Facades\Cache;
@@ -43,6 +44,19 @@ class RoundTest extends TestCase
         $active = User::approved()->active()->get()->pluck('id')->toArray();
         $this->assertTrue(in_array($userA->id, $active));
         $this->assertTrue(in_array($userB->id, $active));
+
+        /** @var Card $filling */
+        $filling = factory(Card::class)->create();
+
+        /** @var Card $toFill */
+        $toFill = factory(Card::class)->create();
+        $toFill->type = Card::$TypeCartToFill;
+        $toFill->save();
+
+        /** @var Card $toFill */
+        $toFill = factory(Card::class)->create();
+        $toFill->type = Card::$TypeCartToFill;
+        $toFill->save();
 
         Round::newRound();
 
