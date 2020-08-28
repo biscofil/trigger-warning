@@ -349,7 +349,7 @@ class TriggerWarningTelegramBot
     private function send_auth_message($chatID, $messageID)
     {
         $this->sendMessage($chatID, $messageID, "Chi cazzo sei??? Prova a ricollegare Telegram: \n" .
-            "1) vai su ```https://triggerwarning.biscofil.it/games/trigger_warning```\n" .
+            "1) vai su ```" . route('play.trigger_warning') ."```\n" .
             "2) premi il pulsante *Accedi con Telegram* in basso\n" .
             "3) nella chat Telegram che si apre premi 'start' in basso!");
     }
