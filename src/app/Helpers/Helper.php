@@ -36,10 +36,10 @@ function getAuthUser(): User
 
 /**
  * @param $path
- * @param null $secure
+ * @param bool|null $secure
  * @return string
  */
-function nocacheasset($path, $secure = null)
+function nocacheasset($path, $secure = true)
 {
 
     $string = config('misc.asset_anticache_string');
