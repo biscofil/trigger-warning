@@ -35,9 +35,6 @@ class TriggerWarningTelegramBot
     {
 
         $url = route('telegram_webhook');
-        if (config('app.env') == 'local') {
-            $url = 'https://731f0382b8be.ngrok.io/' . 'telegram/webhook';
-        }
 
         Log::debug("Setting telegram webhook to $url");
 
