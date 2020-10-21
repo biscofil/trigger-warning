@@ -20,6 +20,6 @@ use Faker\Generator as Faker;
 $factory->define(Card::class, function (Faker $faker) {
     return [
         'content' => $faker->text(100),
-        'type' => Card::$TypeFillingCart,
+        'type' => Card::TypeFillingCart,
     ];
 });
