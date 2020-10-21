@@ -86,6 +86,7 @@ class TriggerWarningTelegramBot
      * @param $messageID
      * @param $code
      * @param $userID
+     * @return bool
      */
     public function do_login($chatID, $messageID, $code, $userID): bool
     {
@@ -245,7 +246,7 @@ class TriggerWarningTelegramBot
 
                         $requestData = [
                             'content' => $cardContent,
-                            'type' => Card::$TypeFillingCart
+                            'type' => Card::TypeFillingCart
                         ];
 
                         $newCardRequest = new NewCardRequest();
@@ -265,7 +266,7 @@ class TriggerWarningTelegramBot
                         break;
 
                     }
-
+                    break;
 
                 case '/riempibile':
 
@@ -284,7 +285,7 @@ class TriggerWarningTelegramBot
 
                         $requestData = [
                             'content' => $cardContent,
-                            'type' => Card::$TypeCartToFill
+                            'type' => Card::TypeCartToFill
                         ];
 
                         $newCardRequest = new NewCardRequest();
@@ -304,6 +305,7 @@ class TriggerWarningTelegramBot
                         break;
 
                     }
+                    break;
 
                 case '/help':
                     $this->sendMessage($chatID, $messageID, "Usa " . PHP_EOL .

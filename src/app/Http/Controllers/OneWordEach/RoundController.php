@@ -60,7 +60,6 @@ class RoundController extends Controller
         /** @var User $user */
         $me = auth()->user();
 
-        /** @var WordRound $round */
         $round->load('word');
         $round->load('guessingUser');
         $round->load('firstSuggestingUser');

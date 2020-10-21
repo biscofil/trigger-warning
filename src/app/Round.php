@@ -233,6 +233,7 @@ class Round extends Model
         $this->main_card_id = $mainCard->id;
 
         $mainCard->usage_count = $mainCard->usage_count + 1;
+        $mainCard->replacePlaceholders();
         $mainCard->save();
 
     }
@@ -256,6 +257,9 @@ class Round extends Model
             'user_id' => null,
             'picked' => false
         ]);
+
+        DB::statement("UPDATE cards SET content = original_content WHERE original_content IS NOT NULL;");
+
     }
 
     /**
@@ -357,6 +361,7 @@ class Round extends Model
                 // TODO fix : Call to a member function owner() on null
                 $card->owner()->associate($player);
                 $card->usage_count = $card->usage_count + 1;
+                $card->replacePlaceholders();
                 $card->save();
 
             }

@@ -29,7 +29,7 @@ class NewCardRequest extends FormRequest
     public function rules()
     {
         return [
-            'type' => ['required', 'numeric', Rule::in([Card::$TypeCartToFill, Card::$TypeFillingCart])],
+            'type' => ['required', 'numeric', Rule::in([Card::TypeCartToFill, Card::TypeFillingCart])],
             'content' => ['required', 'max:255'],
         ];
     }
@@ -46,7 +46,7 @@ class NewCardRequest extends FormRequest
 
         $type = intval($validatedData['type']);
 
-        if ($type == Card::$TypeCartToFill) {
+        if ($type == Card::TypeCartToFill) {
 
             $count = substr_count($validatedData['content'], '@');
 

@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Class CardController
@@ -91,7 +92,7 @@ class CardController extends Controller
      *
      * @param NewCardRequest $request
      * @return array|JsonResponse|Response
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function store(NewCardRequest $request)
     {
@@ -110,7 +111,7 @@ class CardController extends Controller
      *
      * @param Request $request
      * @param Card $card
-     * @return Response
+     * @return void
      */
     public function update(Request $request, Card $card)
     {
@@ -121,7 +122,7 @@ class CardController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Card $card
-     * @return Response
+     * @return void
      */
     public function destroy(Card $card)
     {

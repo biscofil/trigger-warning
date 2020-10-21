@@ -52,7 +52,6 @@ class RoundController extends Controller
         /** @var User $user */
         $me = auth()->user();
 
-        /** @var Round $round */
         $round->load('host');
         $round->load('cardToFill');
 

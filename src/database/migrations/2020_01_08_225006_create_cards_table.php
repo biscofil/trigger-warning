@@ -21,7 +21,7 @@ class CreateCardsTable extends Migration
 
             $table->bigIncrements('id');
 
-            $table->unsignedSmallInteger('type')->default(Card::$TypeFillingCart);
+            $table->unsignedSmallInteger('type')->default(Card::TypeFillingCart);
 
             $table->boolean('approved')->default(false);
 

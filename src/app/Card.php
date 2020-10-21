@@ -6,13 +6,15 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 /**
  * Class Card
  * @package App
- * @property mixed id
- * @property mixed type
- * @property mixed content
+ * @property int|null id
+ * @property int type
+ * @property string content
+ * @property string|null original_content
  * @property bool approved
  * @property int usage_count
  * @property int win_count
@@ -32,14 +34,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Card extends Model
 {
+    public const TypeCartToFill = 1;
+    public const TypeFillingCart = 2;
 
-    public static $TypeCartToFill = 1;
-    public static $TypeFillingCart = 2;
+    public const NAME_PLACEHOLDER = '{{name}}';
 
     protected $fillable = [
         'id',
         'type',
         'content',
+        'original_content',
         'picked',
         'order', // used for deck and picked cards
         'user_id',
@@ -168,7 +172,7 @@ class Card extends Model
      */
     public function scopeToFill(Builder $query): Builder
     {
-        return $query->where('type', '=', self::$TypeCartToFill);
+        return $query->where('type', '=', self::TypeCartToFill);
     }
 
     /**
@@ -177,7 +181,7 @@ class Card extends Model
      */
     public function scopeFilling(Builder $query): Builder
     {
-        return $query->where('type', '=', self::$TypeFillingCart);
+        return $query->where('type', '=', self::TypeFillingCart);
     }
 
     /**
@@ -225,5 +229,26 @@ class Card extends Model
     {
         return substr_count($this->content, '@');
     }
+
+    /**
+     *
+     */
+    public function replacePlaceholders(): void
+    {
+        if (!is_null($this->original_content)) {
+            $this->content = $this->original_content;
+
+            // User name placeholder
+            if (Str::contains($this->content, self::NAME_PLACEHOLDER)) {
+                $count = substr_count($this->content, self::NAME_PLACEHOLDER);
+                $users = User::query()->select('name')->get()->pluck('name')->toArray();
+                for ($i = 0; $i < $count; $i++) {
+                    $this->content = str_replace(self::NAME_PLACEHOLDER, $users[array_rand($users)], $this->original_content);
+                }
+            }
+
+        }
+    }
+
 
 }

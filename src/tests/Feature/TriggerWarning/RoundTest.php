@@ -50,7 +50,7 @@ class RoundTest extends TestCase
 
         /** @var Card $toFill */
         $toFill = factory(Card::class)->create();
-        $toFill->type = Card::$TypeCartToFill;
+        $toFill->type = Card::TypeCartToFill;
         $toFill->save();
 
         Round::newRound();
