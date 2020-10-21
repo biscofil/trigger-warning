@@ -242,6 +242,9 @@ class Card extends Model
             if (Str::contains($this->content, self::NAME_PLACEHOLDER)) {
                 $count = substr_count($this->content, self::NAME_PLACEHOLDER);
                 $users = User::query()->select('name')->get()->pluck('name')->toArray();
+
+                $users = count($users) ? $users : ["qualcuno", "gesù"]; // fallback
+
                 for ($i = 0; $i < $count; $i++) {
                     $this->content = str_replace(self::NAME_PLACEHOLDER, $users[array_rand($users)], $this->original_content);
                 }
