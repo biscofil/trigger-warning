@@ -22,6 +22,9 @@ class RoundTest extends TestCase
     public function new_round()
     {
 
+        config(['game.trigger_warning.cards_per_user' => 1]);
+        config(['game.trigger_warning.min_users_for_round' => 2]);
+
         Round::open()->update(['opened' => false]); // close all
 
         Cache::forget(User::CacheUserListKey);
