@@ -70,13 +70,8 @@ class Card extends Model
 
         $waitHours = config('game.trigger_warning.card_random.wait_hours');
 
-        if (!is_null($waitHours)) {
-
-            $now = Carbon::now();
-            $date = $now->subHours(intval($waitHours));
-
-            $query->where('created_at', '<', $date->toDateTimeString());
-        }
+        $query->where('created_at', '<',
+            Carbon::now()->subHours($waitHours)->toDateTimeString());
 
         return $query;
     }

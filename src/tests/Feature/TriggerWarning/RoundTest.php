@@ -22,8 +22,12 @@ class RoundTest extends TestCase
     public function new_round()
     {
 
+        Round::query()->delete();
+        Card::query()->delete();
+
         config(['game.trigger_warning.cards_per_user' => 1]);
         config(['game.trigger_warning.min_users_for_round' => 2]);
+        config(['game.trigger_warning.card_random.wait_hours' => 0]);
 
         Round::open()->update(['opened' => false]); // close all
 
@@ -33,13 +37,13 @@ class RoundTest extends TestCase
         $userA = factory(User::class)->create();
         $userA->setOnline(true);
 
-        sleep(1);
+        sleep(2);
 
         /** @var User $userB */
         $userB = factory(User::class)->create();
         $userB->setOnline(true);
 
-        sleep(1);
+        sleep(2);
 
         $this->assertTrue(in_array($userA->id, User::getCacheOnlineUserList()));
         $this->assertTrue(in_array($userB->id, User::getCacheOnlineUserList()));
@@ -48,15 +52,27 @@ class RoundTest extends TestCase
         $this->assertTrue(in_array($userA->id, $active));
         $this->assertTrue(in_array($userB->id, $active));
 
-        factory(Card::class)->create();
+        // normal cards
         factory(Card::class)->create();
 
+        // card with placeholder
+        /** @var Card $cardWithPlaceholder */
+        $cardWithPlaceholder = factory(Card::class)->make();
+        $cardWithPlaceholder->original_content = Card::NAME_PLACEHOLDER;
+        $cardWithPlaceholder->save();
+
         /** @var Card $toFill */
-        $toFill = factory(Card::class)->create();
+        $toFill = factory(Card::class)->make();
         $toFill->type = Card::TypeCartToFill;
         $toFill->save();
 
+        sleep(2);
+
         Round::newRound();
+
+        $cardWithPlaceholder = $cardWithPlaceholder->fresh();
+        $this->assertStringNotContainsString(Card::NAME_PLACEHOLDER, $cardWithPlaceholder->content);
+        $this->assertStringContainsString(Card::NAME_PLACEHOLDER, $cardWithPlaceholder->original_content);
 
     }
 

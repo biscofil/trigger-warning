@@ -22,7 +22,7 @@ return [
 
             'days_multiplier' => env('GAME_CARDS_DAYS_MULTIPLIER'),
 
-            'wait_hours' => env('GAME_CARDS_WAIT_HOURS')
+            'wait_hours' => intval(env('GAME_CARDS_WAIT_HOURS', 1))
 
         ]
 

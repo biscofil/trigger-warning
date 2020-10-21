@@ -217,11 +217,10 @@ class Round extends Model
     private function getMainCardToBeFilled(): void
     {
 
-        $now = Carbon::now();
-        $date = $now->subHours(1);
+        $waitHours = config('game.trigger_warning.card_random.wait_hours');
 
         $mainCard = Card::toFill()
-            ->where('created_at', '<', $date->toDateTimeString())
+            ->where('created_at', '<',  Carbon::now()->subHours($waitHours)->toDateTimeString())
             ->smartRandom()
             ->first();
 
