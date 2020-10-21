@@ -15,6 +15,8 @@ class AddOriginalContentToCards extends Migration
      */
     public function up()
     {
+        DB::statement("DELETE FROM cards WHERE creator_user_id IS NULL;");
+
         Schema::table('cards', function (Blueprint $table) {
             $table->string('original_content')->after('content')->nullable()->default(null);
         });
