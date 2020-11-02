@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
 use App\User;
