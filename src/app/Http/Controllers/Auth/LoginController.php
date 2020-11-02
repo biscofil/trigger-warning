@@ -76,8 +76,6 @@ class LoginController extends Controller
                 ->where('provider_id', $user->id)
                 ->first();
 
-            //event(new MyEvent('hello world'));
-
             if ($existingUser) {
 
 
