@@ -100,9 +100,11 @@ class CardController extends Controller
         /** @var User $user */
         $me = auth()->user();
 
-        $request->store($me);
+        $card = $request->store($me);
 
-        return [];
+        return [
+            'id' => $card->id
+        ];
 
     }
 
