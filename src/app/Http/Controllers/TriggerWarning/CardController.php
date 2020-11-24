@@ -108,26 +108,4 @@ class CardController extends Controller
 
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param Card $card
-     * @return void
-     */
-    public function update(Request $request, Card $card)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Card $card
-     * @return void
-     */
-    public function destroy(Card $card)
-    {
-        //
-    }
 }
