@@ -31,6 +31,8 @@ use Illuminate\Support\Str;
  * @method static self|Builder notUsedTooManyTimes()
  * @method static self|Builder picked(bool $true)
  * @method static self create(array $array)
+ * @method static self|null find($id)
+ * @method static self findOrFail($id)
  */
 class Card extends Model
 {
