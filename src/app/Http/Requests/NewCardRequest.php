@@ -60,9 +60,9 @@ class NewCardRequest extends FormRequest
 
         }
 
-
         return Card::create([
             'content' => $validatedData['content'],
+            'original_content' => strpos($validatedData['content'], Card::NAME_PLACEHOLDER) !== false ? $validatedData['content'] : null,
             'type' => $type,
             'creator_user_id' => $me->id
         ]);

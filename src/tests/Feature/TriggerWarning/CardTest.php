@@ -35,15 +35,56 @@ class CardTest extends TestCase
     /**
      * @test
      */
+    public function create(){
+        /** @var Card $card */
+        $card = factory(Card::class)->make();
+
+        $card->content = "AAA BBB";
+
+        $user = $this->getUser();
+
+        $data = [
+            'type' => Card::TypeFillingCart,
+            'content' => $card->content
+        ];
+
+        $response = $this->actingAs($user)->json('POST', 'api/games/trigger_warning/cards', $data);
+        $response->assertStatus(200);
+        $cardID = $response->json()['id'];
+
+        $card = Card::findOrFail($cardID);
+
+        $this->assertNull($card->original_content);
+        $card->replacePlaceholders();
+        $this->assertStringContainsString("AAA", $card->content);
+    }
+
+    /**
+     * @test
+     */
     public function replacePlaceholdersTest()
     {
 
         /** @var Card $card */
-        $card = factory(Card::class)->create();
+        $card = factory(Card::class)->make();
 
-        $card->original_content = "AAA" . Card::NAME_PLACEHOLDER . "BBB";
+        $card->content = "AAA" . Card::NAME_PLACEHOLDER . "BBB";
+
+        $user = $this->getUser();
+
+        $data = [
+            'type' => Card::TypeFillingCart,
+            'content' => $card->content
+        ];
+
+        $response = $this->actingAs($user)->json('POST', 'api/games/trigger_warning/cards', $data);
+        $response->assertStatus(200);
+        $cardID = $response->json()['id'];
+
+        $card = Card::findOrFail($cardID);
+
+        $this->assertNotNull($card->original_content);
         $card->replacePlaceholders();
-
         $this->assertStringContainsString("AAA", $card->content);
         $this->assertStringNotContainsString(Card::NAME_PLACEHOLDER, $card->content);
         $this->assertStringContainsString("BBB", $card->content);
