@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Class User
+ * @package App
  * @property mixed id
  * @property mixed name
  * @property mixed email
@@ -26,9 +27,11 @@ use Illuminate\Support\Facades\Log;
  * @property null|string telegram_id
  * @property null|string telegram_auth_code
  *
- * @package App
+ * @property bool in_open_trigger_warning_round
+ *
  * @method static Builder|self approved()
- * @method static Builder|self active()
+ * @method static Builder|self active(bool $not = false)
+ * @method static Builder|self inRound()
  */
 class User extends Authenticatable
 {
@@ -48,11 +51,13 @@ class User extends Authenticatable
         'score',
         'provider', 'provider_id',
         'avatar', 'avatar_original',
-        'telegram_id', 'telegram_auth_code'
+        'telegram_id', 'telegram_auth_code',
+        'in_open_trigger_warning_round'
     ];
 
     protected $casts = [
         'approved' => 'bool',
+        'in_open_trigger_warning_round' => 'bool',
     ];
 
     protected $appends = [
@@ -90,11 +95,21 @@ class User extends Authenticatable
 
     /**
      * @param Builder $query
+     * @param bool $not
      * @return Builder
      */
-    public function scopeActive(Builder $query): Builder
+    public function scopeActive(Builder $query, bool $not = false): Builder
     {
-        return $query->whereIn('id', self::getCacheOnlineUserList());
+        return $query->whereIn('id', self::getCacheOnlineUserList(), 'and', $not);
+    }
+
+    /**
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeInRound(Builder $query): Builder
+    {
+        return $query->where('in_open_trigger_warning_round', '=', true);
     }
 
     // ################################################################ RELATIONS
@@ -179,7 +194,7 @@ class User extends Authenticatable
                     ->select('id')
                     ->pluck('id')
                     ->toArray(),
-                );
+            );
         }
     }
 

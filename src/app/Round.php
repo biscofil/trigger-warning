@@ -82,7 +82,7 @@ class Round extends Model
     public function players(): Collection
     {
         return User::approved()
-            ->active()
+            ->inRound()
             ->where('id', '<>', $this->host_user_id)
             ->get();
     }
@@ -101,16 +101,34 @@ class Round extends Model
     }
 
     /**
+     * Users that are active (cache) are enabled for the round in the database
+     */
+    static function addActiveUsersToRound(): void
+    {
+        // users that are online (cache) will have in_open_trigger_warning_round = 1
+        $rows = User::approved()->active()->update([
+            'in_open_trigger_warning_round' => true
+        ]);
+        Log::debug($rows . " users will join the round");
+        // users that are not online (cache) will have in_open_trigger_warning_round = 0
+        $rows = User::approved()->active(true)->update([
+            'in_open_trigger_warning_round' => false
+        ]);
+        Log::debug($rows . " users will be excluded from the round");
+    }
+
+    /**
      * @return Round
      * @throws GameException
      * @throws Exception
      */
     public static function newRound(): Round
     {
-
-        Log::debug("#### NEW ROUND ####");
-
         self::checkOpenRounds();
+
+        Log::debug("#### CREATING NEW ROUND ####");
+
+        self::addActiveUsersToRound();
 
         self::clearPlayersPickedCards();
 
@@ -157,7 +175,7 @@ class Round extends Model
     private static function checkNumberOfPlayers(): void
     {
         $minUsersForRound = config('game.trigger_warning.min_users_for_round');
-        $actualOnlineCount = User::approved()->active()->count();
+        $actualOnlineCount = User::approved()->inRound()->count();
         if ($actualOnlineCount < $minUsersForRound) {
             throw new GameException('Servono almeno ' . $minUsersForRound . ' stronzi ma ce sono solo ' . $actualOnlineCount);
         }
@@ -178,14 +196,14 @@ class Round extends Model
             // first round ever
 
             /** @var User $host */
-            $host = User::approved()->active()->first();
+            $host = User::approved()->inRound()->first();
 
         } else {
 
             /** @var Round $lastRound */
 
             $host = User::approved()
-                ->active()
+                ->inRound()
                 ->where('id', '>', $lastRound->host_user_id)
                 ->orderBy('id', 'asc')
                 ->first();
@@ -195,7 +213,7 @@ class Round extends Model
                 //last registered user, start from the first ID
 
                 $host = User::approved()
-                    ->active()
+                    ->inRound()
                     ->orderBy('id', 'asc')
                     ->first();
 
@@ -220,7 +238,7 @@ class Round extends Model
         $waitHours = config('game.trigger_warning.card_random.wait_hours');
 
         $mainCard = Card::toFill()
-            ->where('created_at', '<',  Carbon::now()->subHours($waitHours)->toDateTimeString())
+            ->where('created_at', '<', Carbon::now()->subHours($waitHours)->toDateTimeString())
             ->smartRandom()
             ->first();
 
@@ -343,7 +361,6 @@ class Round extends Model
      */
     private function assignCards(Collection $cardsToAssign, Collection $players): void
     {
-
         foreach ($players as $player) {
 
             /** @var User $player */
@@ -351,8 +368,6 @@ class Round extends Model
             $cardsNeeded = $player->cardsNeeded();
 
             for ($a = 0; $a < $cardsNeeded; $a++) {
-
-                Log::debug("adding card to user " . $player->id);
 
                 /** @var Card $card */
                 $card = $cardsToAssign->pop();
