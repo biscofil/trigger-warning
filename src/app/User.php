@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\Log;
  * @method static Builder|self approved()
  * @method static Builder|self active(bool $not = false)
  * @method static Builder|self inRound()
+ * @method static self findOrFail($id)
+ * @method static self|null find($id)
  */
 class User extends Authenticatable
 {
