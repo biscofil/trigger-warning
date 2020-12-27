@@ -50,6 +50,15 @@ class TriggerWarningTelegramBot
 
     }
 
+    /**
+     * @return string
+     * @throws TelegramSDKException
+     */
+    public function getWebhook(): string
+    {
+        return $this->telegram->getWebhookInfo()['url'];
+    }
+
     private static function get_code_hash($code): string
     {
         return md5($code);

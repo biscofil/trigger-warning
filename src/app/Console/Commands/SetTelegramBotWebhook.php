@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\TriggerWarningTelegramBot;
 use Illuminate\Console\Command;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 
 class SetTelegramBotWebhook extends Command
 {
@@ -19,27 +20,19 @@ class SetTelegramBotWebhook extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    protected $description = 'Sets telegram webhook';
 
     /**
      * @return int
-     * @throws \Telegram\Bot\Exceptions\TelegramSDKException
+     * @throws TelegramSDKException
      */
     public function handle(): int
     {
         $k = new TriggerWarningTelegramBot();
+        $this->info("Webhook was " . $k->getWebhook());
         if ($k->setWebhook()) {
             $this->info("OK");
+            $this->info("Webhook is now " . $k->getWebhook());
         } else {
             $this->error("Errore");
         }
