@@ -50,7 +50,7 @@ class TriggerWarningTelegramBot
 
     }
 
-    private static function get_code_hash($code)
+    private static function get_code_hash($code): string
     {
         return md5($code);
     }
@@ -93,6 +93,7 @@ class TriggerWarningTelegramBot
      * @param $code
      * @param $userID
      * @return bool
+     * @throws TelegramSDKException
      */
     public function do_login($chatID, $messageID, $code, $userID): bool
     {
@@ -126,7 +127,7 @@ class TriggerWarningTelegramBot
      * @param $msg
      * @throws TelegramSDKException
      */
-    public function sendMessage($chatID, $messageID, $msg) : void
+    public function sendMessage($chatID, $messageID, $msg): void
     {
         $this->telegram->sendMessage([
             'chat_id' => $chatID,
@@ -140,7 +141,7 @@ class TriggerWarningTelegramBot
      * TODO
      * @throws TelegramSDKException
      */
-    public function getMe() : void
+    public function getMe(): void
     {
 
         $response = $this->telegram->getMe();
@@ -157,6 +158,7 @@ class TriggerWarningTelegramBot
 
     /**
      * @param array $request
+     * @throws TelegramSDKException
      */
     public function parse_webhook(array $request): void
     {
@@ -357,8 +359,9 @@ class TriggerWarningTelegramBot
     /**
      * @param $chatID
      * @param $messageID
+     * @throws TelegramSDKException
      */
-    private function send_auth_message($chatID, $messageID)
+    private function send_auth_message($chatID, $messageID): void
     {
         $this->sendMessage($chatID, $messageID, "Chi cazzo sei??? Prova a ricollegare Telegram: \n" .
             "1) vai su ```" . route('play.trigger_warning') . "```\n" .
