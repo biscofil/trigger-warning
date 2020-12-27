@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Round;
 use App\TriggerWarningTelegramBot;
 use App\User;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TriggerWarningController
@@ -52,11 +53,15 @@ class TriggerWarningController extends Controller
      */
     public function telegram_webhook()
     {
-
-        $k = new TriggerWarningTelegramBot();
-        $k->parse_webhook(request()->toArray());
-        return [];
-
+        Log::debug("telegram_webhook");
+        try {
+            $k = new TriggerWarningTelegramBot();
+            $k->parse_webhook(request()->toArray());
+            return [];
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['error' => 1], 400);
+        }
     }
 
 }
