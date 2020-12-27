@@ -212,6 +212,8 @@ class TriggerWarningTelegramBot
 
             $parts = explode(' ', $messageText, 2); // max 2
 
+            Log::debug("telegram command: " . $parts[0]);
+
             switch ($parts[0]) {
 
                 case '/start':
@@ -237,7 +239,7 @@ class TriggerWarningTelegramBot
 
                         if (is_null($user)) {
 
-                            Log::debug("no user with id " . $userID);
+                            Log::error("no user with id " . $userID);
                             $this->send_auth_message($chatID, $messageID);
                             break;
                         }
