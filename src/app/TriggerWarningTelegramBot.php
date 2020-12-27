@@ -4,11 +4,18 @@
 namespace App;
 
 use App\Http\Requests\NewCardRequest;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Telegram\Bot\Api;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 
+/**
+ * Class TriggerWarningTelegramBot
+ * @package App
+ * @property Api $telegram
+ */
 class TriggerWarningTelegramBot
 {
 
@@ -20,7 +27,8 @@ class TriggerWarningTelegramBot
         $token = config('telegram.bot_token');
 
         if (is_null($token)) {
-            throw new \Exception("Telegram bot token not set");
+            Log::error("Telegram bot token not set");
+            throw new Exception("Telegram bot token not set");
         }
 
         $this->telegram = new Api($token);
@@ -29,7 +37,7 @@ class TriggerWarningTelegramBot
 
     /**
      * @return bool
-     * @throws \Telegram\Bot\Exceptions\TelegramSDKException
+     * @throws TelegramSDKException
      */
     public function setWebhook(): bool
     {
@@ -38,9 +46,7 @@ class TriggerWarningTelegramBot
 
         Log::debug("Setting telegram webhook to $url");
 
-        $response = $this->telegram->setWebhook(['url' => $url]);
-
-        return $response->getRawResponse()[0];
+        return $this->telegram->setWebhook(['url' => $url]);
 
     }
 
@@ -118,8 +124,9 @@ class TriggerWarningTelegramBot
      * @param $chatID
      * @param $messageID
      * @param $msg
+     * @throws TelegramSDKException
      */
-    public function sendMessage($chatID, $messageID, $msg)
+    public function sendMessage($chatID, $messageID, $msg) : void
     {
         $this->telegram->sendMessage([
             'chat_id' => $chatID,
@@ -130,9 +137,10 @@ class TriggerWarningTelegramBot
     }
 
     /**
-     *
+     * TODO
+     * @throws TelegramSDKException
      */
-    public function getMe()
+    public function getMe() : void
     {
 
         $response = $this->telegram->getMe();
@@ -201,7 +209,7 @@ class TriggerWarningTelegramBot
             $userID = $request['message']['from']['id'];
             $chatID = $request['message']['chat']['id'];
             $messageText = $request['message']['text'];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e->getMessage());
         }
 
@@ -259,7 +267,7 @@ class TriggerWarningTelegramBot
                         $newCardRequest->request->replace($requestData);
                         try {
                             $newCardRequest->store($user);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             $this->sendMessage($chatID, $messageID, "Errore nella creazione della carta: " . $e->getMessage());
                             break;
                         }
@@ -298,7 +306,7 @@ class TriggerWarningTelegramBot
                         $newCardRequest->request->replace($requestData);
                         try {
                             $newCardRequest->store($user);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             $this->sendMessage($chatID, $messageID, "Errore nella creazione della carta: " . $e->getMessage());
                             break;
                         }
@@ -353,7 +361,7 @@ class TriggerWarningTelegramBot
     private function send_auth_message($chatID, $messageID)
     {
         $this->sendMessage($chatID, $messageID, "Chi cazzo sei??? Prova a ricollegare Telegram: \n" .
-            "1) vai su ```" . route('play.trigger_warning') ."```\n" .
+            "1) vai su ```" . route('play.trigger_warning') . "```\n" .
             "2) premi il pulsante *Accedi con Telegram* in basso\n" .
             "3) nella chat Telegram che si apre premi 'start' in basso!");
     }
