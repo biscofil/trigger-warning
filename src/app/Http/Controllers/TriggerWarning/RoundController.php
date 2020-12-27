@@ -76,14 +76,19 @@ class RoundController extends Controller
     /**
      * @param Request $request
      * @param Round $round
-     * @param User $winner
      * @return array|JsonResponse
      */
-    public function close_round(Request $request, Round $round, User $winner)
+    public function close_round(Request $request, Round $round)
     {
 
-        try {
+        $validatedData = $request->validate([
+            'winner_user_id' => ['present', 'nullable', 'exists:users,id']
+        ]);
 
+        try {
+            /** @var int|null $winnerId */
+            $winnerId = $validatedData['winner_user_id'];
+            $winner = is_null($winnerId) ? null : User::findOrFail($winnerId);
             $round->close($winner);
 
         } catch (GameException $e) {

@@ -68,11 +68,19 @@ class RoundTest extends TestCase
 
         sleep(2);
 
-        Round::newRound();
+        $round = Round::newRound();
 
         $cardWithPlaceholder = $cardWithPlaceholder->fresh();
         $this->assertStringNotContainsString(Card::NAME_PLACEHOLDER, $cardWithPlaceholder->content);
         $this->assertStringContainsString(Card::NAME_PLACEHOLDER, $cardWithPlaceholder->original_content);
+
+        // test close
+
+        $closeResponse = $this->actingAs($userA)
+            ->json('POST', 'api/games/trigger_warning/rounds/' . $round->id . '/close', [
+                'winner_user_id' => null
+            ]);
+        $closeResponse->assertStatus(200);
 
     }
 

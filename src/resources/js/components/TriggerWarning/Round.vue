@@ -161,253 +161,257 @@
 
 <script>
 
-    import PlayerProfile from "../PlayerProfile";
-    import Card from "./Card";
-    import draggable from 'vuedraggable';
-    import shuffle from 'lodash/shuffle'
+import PlayerProfile from "../PlayerProfile";
+import Card from "./Card";
+import draggable from 'vuedraggable';
+import shuffle from 'lodash/shuffle'
 
-    export default {
+export default {
 
-        name: "Round",
+    name: "Round",
 
-        components: {
-            draggable,
-            Card,
-            PlayerProfile
+    components: {
+        draggable,
+        Card,
+        PlayerProfile
+    },
+
+    props: {
+        round_id: {
+            required: true
+        }
+    },
+
+    mounted() {
+
+        let self = this;
+        self.fetch();
+
+        this.$nextTick(function () {
+
+            window.setInterval(() => {
+
+                if (self.round) {
+                    if (self.round.ready_to_pick) {
+                        return;
+                    }
+                }
+
+                self.fetch();
+
+            }, 5000);
+
+        })
+
+    },
+
+    data() {
+        return {
+            me: null,
+            round: null,
+            my_cards: null,
+            picked_cards: null,
+            rand_players: []
+        }
+    },
+
+    computed: {
+
+        dragOptions() {
+            return {
+                animation: 0,
+                group: "user_cards",
+                disabled: false,
+            };
         },
 
-        props: {
-            round_id: {
-                required: true
-            }
+        orderedPickedCards() {
+            return this.sortCards(this.picked_cards);
+        }
+
+    },
+
+    methods: {
+
+        sortCards(cards) {
+            return cards.sort((one, two) => {
+                return one.order - two.order;
+            });
         },
 
-        mounted() {
+        fetch() {
+            let self = this;
+
+            axios.get('/api/games/trigger_warning/rounds/' + this.round_id)
+                .then(response => {
+                    self.me = response.data.me;
+
+                    self.round = response.data.round;
+
+                    self.round.players = self.round.players.map(function (player) {
+                        player.picked_cards = self.sortCards(player.picked_cards);
+                        return player;
+                    });
+
+                    self.rand_players = shuffle(self.round.players);
+
+                    self.my_cards = response.data.my_cards;
+                    self.picked_cards = response.data.picked_cards;
+                })
+                .catch(e => {
+
+                    self.$toastr.e("Merda...");
+
+                });
+        },
+
+        onDrop(evt) {
 
             let self = this;
-            self.fetch();
 
-            this.$nextTick(function () {
+            let cardId = evt.item.attributes.card_id.value;
 
-                window.setInterval(() => {
+            if (evt.from.id === 'picked_card_list') {
 
-                    if (self.round) {
-                        if (self.round.ready_to_pick) {
-                            return;
-                        }
+                // from picked_card_list
+
+                if (evt.to.id === 'deck') {
+
+                    // to deck
+                    return;
+
+                } else {
+
+                    // picked_card_list reorder
+
+                    if (evt.oldIndex === evt.newIndex) {
+                        // no call required
+                        return;
                     }
 
-                    self.fetch();
-
-                }, 5000);
-
-            })
-
-        },
-
-        data() {
-            return {
-                me: null,
-                round: null,
-                my_cards: null,
-                picked_cards: null,
-                rand_players: []
-            }
-        },
-
-        computed: {
-
-            dragOptions() {
-                return {
-                    animation: 0,
-                    group: "user_cards",
-                    disabled: false,
-                };
-            },
-
-            orderedPickedCards() {
-                return this.sortCards(this.picked_cards);
-            }
-
-        },
-
-        methods: {
-
-            sortCards(cards) {
-                return cards.sort((one, two) => {
-                    return one.order - two.order;
-                });
-            },
-
-            fetch() {
-                let self = this;
-
-                axios.get('/api/games/trigger_warning/rounds/' + this.round_id)
-                    .then(response => {
-                        self.me = response.data.me;
-
-                        self.round = response.data.round;
-
-                        self.round.players = self.round.players.map(function (player) {
-                            player.picked_cards = self.sortCards(player.picked_cards);
-                            return player;
+                    axios.put('/api/games/trigger_warning/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
+                        {
+                            'from_pos': evt.oldIndex,
+                            'to_pos': evt.newIndex
+                        }
+                    )
+                        .then(response => {
+                            self.picked_cards = response.data.picked_cards;
+                            self.$toastr.s("OK");
+                        })
+                        .catch(e => {
+                            let error = e.response ? e.response.data.error : e;
+                            self.$toastr.e(error, "Errore");
                         });
 
-                        self.rand_players = shuffle(self.round.players);
+                }
 
-                        self.my_cards = response.data.my_cards;
-                        self.picked_cards = response.data.picked_cards;
-                    })
-                    .catch(e => {
+            } else {
 
-                        self.$toastr.e("Merda...");
+                // from deck
 
-                    });
-            },
+                if (evt.to.id === 'picked_card_list') {
 
-            onDrop(evt) {
-
-                let self = this;
-
-                let cardId = evt.item.attributes.card_id.value;
-
-                if (evt.from.id === 'picked_card_list') {
-
-                    // from picked_card_list
-
-                    if (evt.to.id === 'deck') {
-
-                        // to deck
-                        return;
-
-                    } else {
-
-                        // picked_card_list reorder
-
-                        if (evt.oldIndex === evt.newIndex) {
-                            // no call required
-                            return;
+                    axios.put('/api/games/trigger_warning/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
+                        {
+                            'to_pos': evt.newIndex
                         }
-
-                        axios.put('/api/games/trigger_warning/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
-                            {
-                                'from_pos': evt.oldIndex,
-                                'to_pos': evt.newIndex
-                            }
-                        )
-                            .then(response => {
-                                self.picked_cards = response.data.picked_cards;
-                                self.$toastr.s("OK");
-                            })
-                            .catch(e => {
-                                let error = e.response ? e.response.data.error : e;
-                                self.$toastr.e(error, "Errore");
-                            });
-
-                    }
+                    )
+                        .then(response => {
+                            self.$toastr.s("OK");
+                        })
+                        .catch(e => {
+                            let error = e.response ? e.response.data.error : e;
+                            self.$toastr.e(error, "Errore");
+                        });
 
                 } else {
 
-                    // from deck
-
-                    if (evt.to.id === 'picked_card_list') {
-
-                        axios.put('/api/games/trigger_warning/rounds/' + this.round.id + '/cards/' + cardId + '/picked',
-                            {
-                                'to_pos': evt.newIndex
-                            }
-                        )
-                            .then(response => {
-                                self.$toastr.s("OK");
-                            })
-                            .catch(e => {
-                                let error = e.response ? e.response.data.error : e;
-                                self.$toastr.e(error, "Errore");
-                            });
-
-                    } else {
-
-                        // deck reorder
-                        return;
-
-                    }
+                    // deck reorder
+                    return;
 
                 }
-
-            },
-
-            onMoveCallback: function (evt, originalEvent) {
-
-                if (evt.from.id === 'picked_card_list') {
-
-                    // from picked_card_list
-
-                    if (evt.to.id === 'deck') {
-
-                        // to deck
-                        return false;
-
-                    } else {
-
-                        // picked_card_list reorder
-                        return true;
-
-                    }
-
-                } else {
-
-                    // from deck
-
-                    if (evt.to.id === 'picked_card_list') {
-
-                        // from deck to picked_card_list
-                        return this.picked_cards.length < this.round.card_to_fill.spaces_count;
-
-                    } else {
-
-                        // deck reorder
-                        return true;
-
-                    }
-
-                }
-
-            },
-
-            electWinner(player) {
-                let self = this;
-
-                axios.post('/api/games/trigger_warning/rounds/' + this.round_id + '/close/' + player.id)
-                    .then(response => {
-                        self.$toastr.s("Ok");
-                        self.$emit('end');
-                    })
-                    .catch(e => {
-                        self.$toastr.e("Merda...");
-                    });
 
             }
+
+        },
+
+        onMoveCallback: function (evt, originalEvent) {
+
+            if (evt.from.id === 'picked_card_list') {
+
+                // from picked_card_list
+
+                if (evt.to.id === 'deck') {
+
+                    // to deck
+                    return false;
+
+                } else {
+
+                    // picked_card_list reorder
+                    return true;
+
+                }
+
+            } else {
+
+                // from deck
+
+                if (evt.to.id === 'picked_card_list') {
+
+                    // from deck to picked_card_list
+                    return this.picked_cards.length < this.round.card_to_fill.spaces_count;
+
+                } else {
+
+                    // deck reorder
+                    return true;
+
+                }
+
+            }
+
+        },
+
+        electWinner(player) {
+            let self = this;
+
+            // TODO confirm, check al card uncovered
+
+            axios.post('/api/games/trigger_warning/rounds/' + this.round_id + '/close', {
+                'winner_user_id': player ? player.id : null
+            })
+                .then(response => {
+                    self.$toastr.s("Ok");
+                    self.$emit('end');
+                })
+                .catch(e => {
+                    self.$toastr.e("Merda...");
+                });
 
         }
 
     }
 
+}
+
 </script>
 
 <style scoped>
 
-    hr {
-        border-top: 2px solid rgba(255, 255, 255, 0.28);
-    }
+hr {
+    border-top: 2px solid rgba(255, 255, 255, 0.28);
+}
 
-    .draggable-wrapper {
-        padding: 20px;
-    }
+.draggable-wrapper {
+    padding: 20px;
+}
 
-    .draggable-holder {
-        min-height: 200px;
-        border-radius: 20px;
-        border: 2px dashed white;
-    }
+.draggable-holder {
+    min-height: 200px;
+    border-radius: 20px;
+    border: 2px dashed white;
+}
 
 </style>

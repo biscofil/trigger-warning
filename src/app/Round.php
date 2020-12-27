@@ -386,23 +386,25 @@ class Round extends Model
     // ############################# CLOSE ROUND ################################
 
     /**
-     * @param User $winner
+     * @param User|null $winner
      * @return void
      * @throws GameException
      */
-    public function close(User $winner): void
+    public function close(?User $winner): void
     {
 
         if (!$this->opened) {
             throw new GameException('Round non aperto');
         }
 
-        $winner->cardsInHand()->picked()->update([
-            'win_count' => DB::raw('`win_count` + 1 ')
-        ]);
+        if (!is_null($winner)) {
+            $winner->cardsInHand()->picked()->update([
+                'win_count' => DB::raw('`win_count` + 1 ')
+            ]);
 
-        $winner->score = $winner->score + 1;
-        $winner->save();
+            $winner->score = $winner->score + 1;
+            $winner->save();
+        }
 
         $this->opened = false;
         $this->save();
