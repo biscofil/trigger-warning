@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: app
+  name: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.network/laravel: "true"
+        io.kompose.service: app
+    spec:
+      containers:
+        - image: biscofil/trigger_warning:latest
+          imagePullPolicy: Never
+          name: app
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: trigger-warning-env
+          env:
+            - name: DB_HOST
+              value: {{ .Values.database.service.name }}
+          volumeMounts:
+            - mountPath: /var/www/storage
+              name: app-storage-claim
+      restartPolicy: Always
+      volumes:
+        - name: app-storage-claim
+          persistentVolumeClaim:
+            claimName: app-storage-claim
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -z -w 2 {{ .Values.database.service.name }} 3306; do echo waiting for db; sleep 2; done;",
+            ]
+        - name: migrate
+          image: biscofil/trigger_warning:latest
+          imagePullPolicy: Never
+          command: ["php", "artisan", "migrate", "--force"]
+          envFrom:
+            - secretRef:
+                name: trigger-warning-env
+          env:
+            - name: DB_HOST
+              value: {{ .Values.database.service.name }}
+          volumeMounts:
+            - mountPath: /var/www/storage
+              name: app-storage-claim
+status: {}

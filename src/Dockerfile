@@ -1,5 +1,20 @@
+FROM node:14.15.5 as node
+
+WORKDIR /app
+
+COPY package.json package.json
+COPY package-lock.json package-lock.json
+COPY resources/js resources/js
+COPY resources/sass resources/sass
+COPY webpack.mix.js webpack.mix.js
+
+RUN npm install
+RUN npm run production
+
 # Set the base image for subsequent instructions
-FROM php:7.4
+FROM php:7.4-apache
+
+WORKDIR /var/www/html
 
 # Update packages
 RUN apt-get update
@@ -24,7 +39,7 @@ RUN docker-php-ext-install intl
 #  --with-png-dir \
 #  --with-zlib-dir
 
-#for php 7.4
+#for php 7.4+
 RUN docker-php-ext-configure gd \
     --with-jpeg=/usr/include/
 
@@ -43,41 +58,36 @@ RUN apt-get clean
 #RUN pecl install mcrypt-1.0.2 && docker-php-ext-enable mcrypt
 
 #for php 7.4
-RUN pecl install mcrypt-1.0.3 && docker-php-ext-enable mcrypt
+#RUN pecl install mcrypt-1.0.3 && docker-php-ext-enable mcrypt
+
+#for php 8
+#RUN pecl install mcrypt && docker-php-ext-enable mcrypt
 
 # Install needed extensions
 # Here you can install any other extension that you need during the test and deployment process
 RUN docker-php-ext-install pdo_mysql zip
 
-RUN pecl install xdebug
+# for php 7.4
+RUN pecl install xdebug-3.1.5
+
+# for php 8
+# RUN pecl install xdebug
 
 RUN docker-php-ext-enable xdebug
 
 # Install Composer
 RUN curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# ##########################
-# ########################## Install NODE, NPM with NVM
-# ##########################
+COPY . /var/www/html/
+RUN composer install
 
-# nvm environment variables
-ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 14.15.5
+COPY --from=node /app/public /var/www/html/public
 
-# install nvm
-# https://github.com/creationix/nvm#install-script
-RUN curl --silent -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.2/install.sh | bash
+# Copy custom Apache site configuration
+COPY apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
-# install node and npm
-RUN /bin/bash -c "source $NVM_DIR/nvm.sh \
-    && nvm install $NODE_VERSION \
-    && nvm alias default $NODE_VERSION \
-    && nvm use default"
+# Enable Apache rewrite module
+RUN a2enmod rewrite
 
-# add node and npm to path so the commands are available
-ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
-ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
-
-RUN node -v
-RUN npm -v
-
+# Expose port 80
+EXPOSE 80

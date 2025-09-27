@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        "set_telegram_webhook" => \App\Console\Commands\SetTelegramBotWebhook::class,
+        "approve_user" => \App\Console\Commands\ApproveUser::class,
     ];
 
     /**
