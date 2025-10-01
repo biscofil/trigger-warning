@@ -32,6 +32,10 @@ spec:
           volumeMounts:
             - mountPath: /var/www/storage
               name: app-storage-claim
+          resources:
+            requests:
+              cpu: "0.500m"
+              memory: "400Mi"
       restartPolicy: Always
       volumes:
         - name: app-storage-claim
@@ -60,3 +64,22 @@ spec:
             - mountPath: /var/www/storage
               name: app-storage-claim
 status: {}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 60
