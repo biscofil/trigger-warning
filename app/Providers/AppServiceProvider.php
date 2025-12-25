@@ -23,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        // Fix for resources loaded through HTTP protocol when the website is using HTTPS, which is caused the "Mixed content" problem.
+        if(config('app.env') === 'production') {
+            \URL::forceScheme('https');
+        }
     }
 }

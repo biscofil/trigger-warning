@@ -172,38 +172,6 @@ class TriggerWarningTelegramBot
     public function parse_webhook(array $request): void
     {
 
-        // array (
-        //  'update_id' => 543070879,
-        //  'message' =>
-        //  array (
-        //    'message_id' => 17,
-        //    'from' =>
-        //    array (
-        //      'id' => 22488611,
-        //      'is_bot' => false,
-        //      'first_name' => 'Bisco',
-        //      'language_code' => 'en',
-        //    ),
-        //    'chat' =>
-        //    array (
-        //      'id' => 22488611,
-        //      'first_name' => 'Bisco',
-        //      'type' => 'private',
-        //    ),
-        //    'date' => 1598283814,
-        //    'text' => '/start test',
-        //    'entities' =>
-        //    array (
-        //      0 =>
-        //      array (
-        //        'offset' => 0,
-        //        'length' => 6,
-        //        'type' => 'bot_command',
-        //      ),
-        //    ),
-        //  ),
-        //)
-
         $messageID = null;
         $userID = null;
         $chatID = null;

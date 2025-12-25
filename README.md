@@ -1,9 +1,5 @@
 # Trigger Warning
 
-[![pipeline status](https://gitlab.com/biscofil/trigger_warning/badges/master/pipeline.svg)](https://gitlab.com/biscofil/trigger_warning/-/commits/master)
-
-[![coverage report](https://gitlab.com/biscofil/trigger_warning/badges/master/coverage.svg)](https://gitlab.com/biscofil/trigger_warning/-/commits/master)
-
 ## Docker configuration change (Dockerfile)
 
 ```shell
@@ -70,9 +66,9 @@ kubectl port-forward svc/app 8080:80 --namespace=trigger-warning &
 # Shell into the pod
 # php artisan approve_user
 
-docker build -t registry.gitlab.com/biscofil/trigger_warning .
-docker push registry.gitlab.com/biscofil/trigger_warning
-docker run -it registry.gitlab.com/biscofil/trigger_warning /bin/bash
+docker build -t biscofil/trigger_warning:latest .
+docker push biscofil/trigger_warning:latest
+docker run -it biscofil/trigger_warning:latest /bin/bash
 # php artisan test
 
 
