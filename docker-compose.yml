@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   trigger_warning_app:
-    image: biscofil/trigger_warning:latest
+    image: biscofil/trigger-warning:latest
     container_name: trigger_warning_app
     ports:
       - "8000:80"
