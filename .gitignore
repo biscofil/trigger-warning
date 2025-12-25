@@ -5,6 +5,7 @@
 /storage/cache/data/*
 /storage/views/*.php
 /storage/logs/*.log
+/storage-volume
 /vendor
 .env
 .env.backup
@@ -16,3 +17,4 @@ yarn-error.log
 *.log
 mysql
 *.tgz
+**/*.sqlite

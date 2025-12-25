@@ -1,0 +1,88 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+name: Workflow
+jobs:
+  php_test:
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 5
+    env:
+      DB_CONNECTION: sqlite
+      DB_DATABASE: db.sqlite
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          extensions: mbstring, bcmath, sqlite, pdo_sqlite, curl, json, xdebug
+      - name: Install dependencies and run tests
+        run: |
+          ./runTests.sh
+
+  npm_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.15.5'
+      - name: Install dependencies
+        run: npm ci --no-progress
+      - name: Build
+        run: |
+          npm run prod
+
+  deploy:
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 5
+    needs: [php_test, npm_test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag and bump version
+        id: bump-version
+        run: |
+          LATEST_TAG=$(git tag -l 'v*' --sort=-version:refname | head -1)
+          if [ -z "$LATEST_TAG" ]; then
+            NEW_VERSION="v0.0.1"
+          else
+            IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST_TAG#v}"
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build container image
+        run: docker build -t biscofil/trigger-warning:${{ steps.bump-version.outputs.new_version }} -f Dockerfile .
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3.3.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push image to Docker Hub
+        run: docker push biscofil/trigger-warning:${{ steps.bump-version.outputs.new_version }}
+
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.bump-version.outputs.new_version }}
+          git push origin ${{ steps.bump-version.outputs.new_version }}
