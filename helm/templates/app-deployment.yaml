@@ -18,7 +18,7 @@ spec:
         io.kompose.service: app
     spec:
       containers:
-        - image: biscofil/trigger_warning:latest
+        - image: biscofil/trigger-warning:latest
           imagePullPolicy: Never
           name: app
           ports:
@@ -51,7 +51,7 @@ spec:
               "until nc -z -w 2 {{ .Values.database.service.name }} 3306; do echo waiting for db; sleep 2; done;",
             ]
         - name: migrate
-          image: biscofil/trigger_warning:latest
+          image: biscofil/trigger-warning:latest
           imagePullPolicy: Never
           command: ["php", "artisan", "migrate", "--force"]
           envFrom:

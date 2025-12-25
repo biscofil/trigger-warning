@@ -9,7 +9,7 @@
 kubectl create namespace trigger-warning
 kubectl create secret generic trigger-warning-env --from-env-file=.env --namespace=trigger-warning
 
-# docker run -p 8080:80 biscofil/trigger_warning:latest
+# docker run -p 8080:80 biscofil/trigger-warning:latest
 # visit localhost:8080
 
 # Metrics
@@ -56,8 +56,8 @@ kubectl apply -f components.yaml
 
 
 
-docker build -t biscofil/trigger_warning:latest .
-kind load docker-image biscofil/trigger_warning:latest
+docker build -t biscofil/trigger-warning:latest .
+kind load docker-image biscofil/trigger-warning:latest
 helm package helm
 helm upgrade --install trigger-warning ./helm --namespace=trigger-warning
 
@@ -66,11 +66,11 @@ kubectl port-forward svc/app 8080:80 --namespace=trigger-warning &
 # Shell into the pod
 # php artisan approve_user
 
-docker build -t biscofil/trigger_warning:latest .
-docker push biscofil/trigger_warning:latest
-docker run -it biscofil/trigger_warning:latest /bin/bash
+docker build -t biscofil/trigger-warning:latest .
+docker push biscofil/trigger-warning:latest
+docker run -it biscofil/trigger-warning:latest /bin/bash
 
-docker run -v ./app:/var/www/html/app -v ./tests:/var/www/html/tests -it biscofil/trigger_warning:latest /bin/bash
+docker run -v ./app:/var/www/html/app -v ./tests:/var/www/html/tests -it biscofil/trigger-warning:latest /bin/bash
 # export DB_CONNECTION=sqlite && export DB_DATABASE=db.sqlite && ./runTests.sh
 
 
