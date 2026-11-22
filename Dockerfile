@@ -1,4 +1,4 @@
-FROM node:14.15.5 as node
+FROM node:14.21.3 as node
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ RUN npm install
 RUN npm run production
 
 # Set the base image for subsequent instructions
-FROM php:7.4-apache
+FROM php:7.4.33-apache
 
 WORKDIR /var/www/html
 
